@@ -4,6 +4,7 @@
 import { sql } from "drizzle-orm";
 import {
   integer,
+  index,
   text,
   boolean,
   pgTableCreator,
@@ -31,7 +32,27 @@ export const replay = createTable("replay", {
   stageId: integer("stage_id").notNull(),
   characterIds: integer("character_ids").array().notNull(),
   replayFileUrl: text("replay_file_url"),
+  venueId: integer("venue_id")
+    .notNull()
+    .references(() => venue.id, { onDelete: "cascade" }),
 });
+
+export const venue = createTable(
+  "venue",
+  {
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    name: text("name").notNull(),
+    description: text("description"),
+    secret: text("secret").notNull(),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
+  },
+  (table) => {
+    return {
+      secretIdx: index("venue_secret_idx").on(table.secret),
+    };
+  },
+);
 
 // ###############
 // # Better Auth #
