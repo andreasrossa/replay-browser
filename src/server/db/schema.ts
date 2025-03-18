@@ -1,16 +1,13 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { create } from "domain";
 import { sql } from "drizzle-orm";
 import {
-  index,
   integer,
   text,
   boolean,
   pgTableCreator,
   timestamp,
-  varchar,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -21,22 +18,24 @@ import {
  */
 export const createTable = pgTableCreator((name) => `replay-browser_${name}`);
 
-export const posts = createTable(
-  "post",
-  {
-    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-    name: varchar("name", { length: 256 }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  }),
-);
+export const replay = createTable("replay", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  frameCount: integer("frame_count"),
+  stageId: integer("stage_id").notNull(),
+  characterIds: integer("character_ids").array().notNull(),
+  replayFileUrl: text("replay_file_url"),
+});
+
+// ###############
+// # Better Auth #
+// ###############
 
 export const user = createTable("user", {
   id: text("id").primaryKey(),
