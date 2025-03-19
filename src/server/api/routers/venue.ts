@@ -9,27 +9,31 @@ export const venueRouter = createTRPCRouter({
     return await db.query.venue.findMany();
   }),
   get: publicProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ uid: z.string() }))
     .query(async ({ ctx: { db }, input }) => {
-      return await db.query.venue.findFirst({ where: eq(venue.id, input.id) });
+      return await db.query.venue.findFirst({
+        where: eq(venue.uid, input.uid),
+      });
     }),
   create: publicProcedure
     .input(
       z.object({
-        name: z.string().regex(/^[a-z0-9_-]+$/),
+        uid: z.string().regex(/^[a-z0-9_-]+$/),
         description: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx: { db }, input }) => {
-      return await db
+      const [createdVenue] = await db
         .insert(venue)
         .values({
-          name: input.name,
+          uid: input.uid,
           description: input.description,
-          secret: crypto.randomBytes(16).toString("hex"),
+          secret: crypto.randomBytes(64).toString("hex"),
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .returning({ uid: venue.uid });
+
+      return createdVenue;
     }),
 });

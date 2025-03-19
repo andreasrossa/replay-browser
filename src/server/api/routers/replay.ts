@@ -19,7 +19,7 @@ export const replayRouter = createTRPCRouter({
           startedAt: input.startedAt,
           stageId: input.stageId,
           characterIds: input.characterIds,
-          venueId: venue.id,
+          venueUid: venue.uid,
         })
         .returning({ id: replay.id });
 

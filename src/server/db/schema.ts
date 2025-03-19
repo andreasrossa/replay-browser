@@ -32,16 +32,15 @@ export const replay = createTable("replay", {
   stageId: integer("stage_id").notNull(),
   characterIds: integer("character_ids").array().notNull(),
   replayFileUrl: text("replay_file_url"),
-  venueId: integer("venue_id")
+  venueUid: text("venue_uid")
     .notNull()
-    .references(() => venue.id, { onDelete: "cascade" }),
+    .references(() => venue.uid, { onDelete: "cascade" }),
 });
 
 export const venue = createTable(
   "venue",
   {
-    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-    name: text("name").notNull(),
+    uid: text("uid").primaryKey(),
     description: text("description"),
     secret: text("secret").notNull(),
     createdAt: timestamp("created_at").notNull(),
