@@ -6,13 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
 import { auth } from "@/lib/auth";
-
+import { eq } from "drizzle-orm";
+import { venue as venueTable } from "@/server/db/schema";
 /**
  * 1. CONTEXT
  *
@@ -107,3 +108,46 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Protected procedure
+ *
+ * Guarantees that a user is logged in and that the "session" context is non-null.
+ */
+export const protectedProcedure = t.procedure.use(
+  async function isAuthed(opts) {
+    const { ctx } = opts;
+    if (!ctx.session) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    return opts.next({
+      ctx: {
+        session: ctx.session,
+      },
+    });
+  },
+);
+
+/**
+ * Venue Procedure
+ *
+ * Protected procedure that reads the venue secret from the request headers.
+ */
+export const protectedVenueProcedure = t.procedure.use(
+  async ({ next, ctx }) => {
+    const { headers } = ctx;
+    const venueSecret = headers.get("x-venue-secret");
+    if (!venueSecret) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    const venue = await db.query.venue.findFirst({
+      where: eq(venueTable.secret, venueSecret),
+    });
+
+    if (!venue) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return next({ ctx: { venue } });
+  },
+);
