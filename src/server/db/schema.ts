@@ -1,7 +1,6 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
 import {
   integer,
   index,
@@ -21,9 +20,6 @@ export const createTable = pgTableCreator((name) => `replay-browser_${name}`);
 
 export const replay = createTable("replay", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
     () => new Date(),
   ),
