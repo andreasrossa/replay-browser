@@ -1,0 +1,23 @@
+meta {
+  name: Start Replay
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base}}/api/replay/start
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Venue-Secret: 2938749827897987298374
+}
+
+body:json {
+  {
+    "stageId": 12,
+    "characterIds": [1,2],
+    "startedAt": 1742338423539
+  }
+}
