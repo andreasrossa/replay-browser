@@ -1,21 +1,21 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { venue } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "node:crypto";
 
 export const venueRouter = createTRPCRouter({
-  list: publicProcedure.query(async ({ ctx: { db } }) => {
+  list: protectedProcedure.query(async ({ ctx: { db } }) => {
     return await db.query.venue.findMany();
   }),
-  get: publicProcedure
+  get: protectedProcedure
     .input(z.object({ uid: z.string() }))
     .query(async ({ ctx: { db }, input }) => {
       return await db.query.venue.findFirst({
         where: eq(venue.uid, input.uid),
       });
     }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         uid: z.string().regex(/^[a-z0-9_-]+$/),
