@@ -11,7 +11,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
-import { auth } from "@/lib/auth";
+import { auth, type Role } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { venue as venueTable } from "@/server/db/schema";
 /**
@@ -114,7 +114,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  *
  * Guarantees that a user is logged in and that the "session" context is non-null.
  */
-export const protectedProcedure = t.procedure.use(
+export const protectedProcedure = publicProcedure.use(
   async function isAuthed(opts) {
     const { ctx } = opts;
     if (!ctx.session) {
@@ -125,6 +125,20 @@ export const protectedProcedure = t.procedure.use(
         session: ctx.session,
       },
     });
+  },
+);
+
+export const adminProcedure = protectedProcedure.use(
+  async function isAdmin(opts) {
+    const { ctx } = opts;
+    if (ctx.session.user.role === ("admin" satisfies Role)) {
+      return opts.next({
+        ctx: {
+          session: ctx.session,
+        },
+      });
+    }
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   },
 );
 
