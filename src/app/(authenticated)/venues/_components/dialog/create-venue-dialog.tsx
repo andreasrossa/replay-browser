@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogHeader,
-  DialogTrigger,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -20,25 +20,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { type CreateVenueSchema, createVenueSchema } from "@/schemas/venue";
 import { api } from "@/trpc/react";
-import { HydrateClient } from "@/trpc/server";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, PlusIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const venueSchema = z.object({
-  uid: z
-    .string()
-    .min(3, "UID must be at least 3 characters long")
-    .regex(
-      /^[a-zA-Z0-9-_]+$/,
-      "Only letters, numbers, dashes and underscores are allowed",
-    ),
-  description: z.string().optional(),
-});
 
 export default function CreateVenueDialog({
   children,
@@ -70,7 +58,7 @@ export default function CreateVenueDialog({
       if (error.data?.zodError) {
         Object.entries(error.data.zodError.fieldErrors).forEach(
           ([field, error]) => {
-            form.setError(field as keyof z.infer<typeof venueSchema>, {
+            form.setError(field as keyof CreateVenueSchema, {
               message: error?.[0],
             });
           },
@@ -88,15 +76,15 @@ export default function CreateVenueDialog({
     },
   });
 
-  const form = useForm<z.infer<typeof venueSchema>>({
-    resolver: zodResolver(venueSchema),
+  const form = useForm<CreateVenueSchema>({
+    resolver: zodResolver(createVenueSchema),
     defaultValues: {
       uid: "",
       description: "",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof venueSchema>) => {
+  const onSubmit = (data: CreateVenueSchema) => {
     mutation.mutate({
       uid: data.uid,
       description: data.description,

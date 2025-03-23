@@ -1,6 +1,8 @@
-import React from "react";
+import { verifySession } from "@/lib/verify-session";
 
-export default function ReplaysPage() {
+export default async function ReplaysPage() {
+  await verifySession();
+
   return (
     <div>
       <h1>Replays</h1>

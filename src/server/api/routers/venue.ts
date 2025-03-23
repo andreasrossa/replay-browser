@@ -1,13 +1,10 @@
-import {
-  adminProcedure,
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createVenueSchema, editVenueServerSchema } from "@/schemas/venue";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 import { venue } from "@/server/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { z } from "zod";
-import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
+import { desc, eq } from "drizzle-orm";
+import crypto from "node:crypto";
+import { z } from "zod";
 import { FormError } from "../errors/FormError";
 
 const publicValueSelect = {
@@ -18,7 +15,7 @@ const publicValueSelect = {
 } as const;
 
 export const venueRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({ ctx: { db } }) => {
+  list: adminProcedure.query(async ({ ctx: { db } }) => {
     const venues = await db.query.venue.findMany({
       columns: publicValueSelect,
       orderBy: [desc(venue.createdAt)],
@@ -26,7 +23,7 @@ export const venueRouter = createTRPCRouter({
 
     return venues;
   }),
-  get: protectedProcedure
+  get: adminProcedure
     .input(z.object({ uid: z.string() }))
     .query(async ({ ctx: { db }, input }) => {
       return await db.query.venue.findFirst({
@@ -35,19 +32,14 @@ export const venueRouter = createTRPCRouter({
       });
     }),
   create: adminProcedure
-    .input(
-      z.object({
-        uid: z.string().regex(/^[a-z0-9_-]+$/, "venue.uid.invalid"),
-        description: z.string().optional(),
-      }),
-    )
+    .input(createVenueSchema)
     .mutation(async ({ ctx: { db }, input }) => {
       const existingVenue = await db.query.venue.findFirst({
         where: eq(venue.uid, input.uid),
       });
 
       if (existingVenue) {
-        throw new FormError("venue.uid.alreadyExists", ["uid"]);
+        throw new FormError("This UID is already taken", ["uid"]);
       }
 
       const [createdVenue] = await db
@@ -67,7 +59,27 @@ export const venueRouter = createTRPCRouter({
 
       return createdVenue;
     }),
-  regenerateSecret: protectedProcedure
+  delete: adminProcedure
+    .input(z.object({ uid: z.string() }))
+    .mutation(async ({ ctx: { db }, input }) => {
+      await db.delete(venue).where(eq(venue.uid, input.uid));
+    }),
+  editDescription: adminProcedure
+    .input(editVenueServerSchema)
+    .mutation(async ({ ctx: { db }, input }) => {
+      const [updatedVenue] = await db
+        .update(venue)
+        .set({ description: input.description })
+        .where(eq(venue.uid, input.uid))
+        .returning({ uid: venue.uid, description: venue.description });
+
+      if (!updatedVenue) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+
+      return updatedVenue;
+    }),
+  regenerateSecret: adminProcedure
     .input(z.object({ uid: z.string() }))
     .mutation(async ({ ctx: { db }, input }) => {
       const [updatedVenue] = await db

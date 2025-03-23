@@ -1,21 +1,5 @@
 "use client";
 
-import { Input } from "../../../components/ui/input";
-import { Button } from "../../../components/ui/button";
-import { FaDiscord, FaGoogle } from "react-icons/fa6";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -24,9 +8,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import React, { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaDiscord, FaGoogle } from "react-icons/fa6";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Button } from "../../../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -80,6 +80,7 @@ export default function LoginCard() {
             autoFill: true,
           })
           .then((res) => {
+            console.log("res", res);
             // yes this is actually how it works. This promise resolves twice.
             // Once with a 400 error (which means the passkey has been preloaded)
             // And once with undefined (which means the user has authenticated successfully).
@@ -87,8 +88,11 @@ export default function LoginCard() {
             // Bruh...
             if (res?.error.status === 400) {
               console.log("Passkey preloaded");
-            }
-            if (res === undefined) {
+            } else if (res?.error.status === 401) {
+              toast.error(
+                "Passkey authentication failed. Please use a different authentication method.",
+              );
+            } else if (res === undefined) {
               router.push("/replays");
             }
           })

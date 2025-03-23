@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
+import type { VenueDTO } from "@/server/db/schema";
 import { api } from "@/trpc/react";
 import {
   createColumnHelper,
@@ -11,9 +12,8 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon, PlusIcon } from "lucide-react";
 import { useMemo } from "react";
-import CreateVenueDialog from "./create-venue-dialog";
+import CreateVenueDialog from "./dialog/create-venue-dialog";
 import VenueActions from "./venue-actions";
-import { VenueDTO } from "@/server/db/schema";
 
 const columnHelper = createColumnHelper<VenueDTO>();
 
@@ -35,7 +35,7 @@ export default function VenueTable() {
         header: "",
         cell: ({ row }) => (
           <div className="flex justify-end">
-            <VenueActions venue={row.original}>
+            <VenueActions venue={row.original} side="bottom">
               <Button variant="ghost" size="icon">
                 <MoreHorizontalIcon className="h-3 w-3" />
               </Button>

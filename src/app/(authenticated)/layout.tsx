@@ -4,8 +4,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -13,8 +11,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Suspense } from "react";
 
 export default function ReplaysLayout({
   children,
@@ -36,7 +32,7 @@ export default function ReplaysLayout({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="p-4">{children}</main>
+        <main className="p-8">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

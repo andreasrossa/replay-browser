@@ -1,11 +1,18 @@
 import { betterAuth } from "better-auth";
-import { admin } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin } from "better-auth/plugins";
 
 import { db } from "@/server/db";
+import {
+  account,
+  passkey,
+  session,
+  user,
+  verification,
+} from "@/server/db/schema";
+import { passkey as passkeyPlugin } from "better-auth/plugins/passkey";
 import { env } from "../env";
 import { accessControl, adminRole, userRole } from "./permissions";
-import { passkey } from "better-auth/plugins/passkey";
 
 export const roles = {
   admin: adminRole,
@@ -17,13 +24,22 @@ export type Role = keyof typeof roles;
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
+    schema: {
+      user: user,
+      session: session,
+      account: account,
+      verification: verification,
+      passkey: passkey,
+    },
   }),
   plugins: [
     admin({
       ac: accessControl,
       roles,
+      defaultRole: "user",
+      adminRoles: ["admin"],
     }),
-    passkey(),
+    passkeyPlugin(),
   ],
   emailAndPassword: {
     enabled: true,

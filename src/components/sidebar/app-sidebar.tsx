@@ -6,34 +6,35 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HomeIcon } from "lucide-react";
-import Link from "next/link";
-import { SidebarUserMenu } from "./sidebar-user-menu";
-import { Skeleton } from "../ui/skeleton";
+import { Session } from "@/lib/auth-client";
+import { Building2Icon, HomeIcon } from "lucide-react";
 import { Suspense } from "react";
+import { Skeleton } from "../ui/skeleton";
+import AppSidebarMenu from "./app-sidebar-menu";
+import { SidebarUserMenu } from "./sidebar-user-menu";
 
-const items = [
+type SidebarItem = {
+  title: string;
+  icon: React.ElementType;
+  href: string;
+  condition?: (session?: Session | null) => boolean;
+};
+
+const items: SidebarItem[] = [
   {
     title: "Home",
     icon: HomeIcon,
     href: "/replays",
   },
+  {
+    title: "Venues",
+    icon: Building2Icon,
+    href: "/venues",
+    condition: (session) => session?.user.role === "admin",
+  },
 ];
-
-function UserMenuSkeleton() {
-  return (
-    <SidebarMenuButton className="flex w-full justify-between">
-      <div className="flex w-full items-center gap-2">
-        <Skeleton className="h-4 w-4" />
-        <Skeleton className="h-4 w-[80%]" />
-        <Skeleton className="ml-auto h-4 w-4" />
-      </div>
-    </SidebarMenuButton>
-  );
-}
 
 export default function AppSidebar() {
   return (
@@ -42,18 +43,9 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.href}>
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <Suspense fallback={<Skeleton className="h-8 w-full" />}>
+              <AppSidebarMenu />
+            </Suspense>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
