@@ -3,21 +3,12 @@ import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 import { venue } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
-import crypto from "node:crypto";
 import { z } from "zod";
 import { FormError } from "../errors/FormError";
-
-const publicValueSelect = {
-  uid: true,
-  description: true,
-  createdAt: true,
-  updatedAt: true,
-} as const;
 
 export const venueRouter = createTRPCRouter({
   list: adminProcedure.query(async ({ ctx: { db } }) => {
     const venues = await db.query.venue.findMany({
-      columns: publicValueSelect,
       orderBy: [desc(venue.createdAt)],
     });
 
@@ -28,7 +19,6 @@ export const venueRouter = createTRPCRouter({
     .query(async ({ ctx: { db }, input }) => {
       return await db.query.venue.findFirst({
         where: eq(venue.uid, input.uid),
-        columns: publicValueSelect,
       });
     }),
   create: adminProcedure
@@ -47,11 +37,10 @@ export const venueRouter = createTRPCRouter({
         .values({
           uid: input.uid,
           description: input.description,
-          secret: crypto.randomBytes(64).toString("hex"),
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning({ uid: venue.uid, secret: venue.secret });
+        .returning();
 
       if (!createdVenue) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -76,19 +65,6 @@ export const venueRouter = createTRPCRouter({
       if (!updatedVenue) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-
-      return updatedVenue;
-    }),
-  regenerateSecret: adminProcedure
-    .input(z.object({ uid: z.string() }))
-    .mutation(async ({ ctx: { db }, input }) => {
-      const [updatedVenue] = await db
-        .update(venue)
-        .set({
-          secret: crypto.randomBytes(64).toString("hex"),
-        })
-        .where(eq(venue.uid, input.uid))
-        .returning({ uid: venue.uid, secret: venue.secret });
 
       return updatedVenue;
     }),

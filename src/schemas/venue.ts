@@ -1,13 +1,5 @@
 import { z } from "zod";
-
-export const venueUidSchema = z
-  .string()
-  .min(3, "UID must be at least 3 characters long")
-  .max(50, "UID must be at most 50 characters long")
-  .regex(
-    /^[a-z0-9_-]+$/,
-    "Only lowercase letters, numbers, dashes, and underscores are allowed",
-  );
+import { uidSchema } from "./common";
 
 export const venueDescriptionSchema = z
   .string()
@@ -15,7 +7,7 @@ export const venueDescriptionSchema = z
   .optional();
 
 export const createVenueSchema = z.object({
-  uid: venueUidSchema,
+  uid: uidSchema,
   description: venueDescriptionSchema,
 });
 
@@ -24,7 +16,7 @@ export const editVenueClientSchema = z.object({
 });
 
 export const editVenueServerSchema = z.object({
-  uid: venueUidSchema,
+  uid: uidSchema,
   description: venueDescriptionSchema,
 });
 
