@@ -10,6 +10,15 @@ import { useDialog } from "@/hooks/use-dialog";
 import { type CollectorDTO } from "@/server/db/schema/collector";
 import { KeyIcon, TrashIcon } from "lucide-react";
 
+/**
+ * Renders a dropdown menu with actions to manage a collector.
+ *
+ * This component displays a dropdown menu with two actions: one to regenerate the collector's secret (triggering an edit dialog) and another to delete the collector (triggering a delete dialog). The dropdown's position can be customized via the `side` prop.
+ *
+ * @param collector - The collector entity for which the actions are provided.
+ * @param children - The element used as the trigger for displaying the dropdown menu.
+ * @param side - Optional position of the dropdown menu relative to the trigger (default is "left").
+ */
 export default function CollectorActions({
   collector: _collector,
   children,

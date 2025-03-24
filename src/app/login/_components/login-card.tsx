@@ -33,6 +33,18 @@ const formSchema = z.object({
   password: z.string().min(8),
 });
 
+/**
+ * Renders a login card with multiple authentication methods.
+ *
+ * This component displays a form for email/password login and provides social login via Discord.
+ * It uses react-hook-form paired with Zod for form handling and validation, while managing
+ * loading states and error notifications. On devices that support it, the component also
+ * attempts a silent passkey-based authentication and redirects the user upon successful login.
+ *
+ * @remarks
+ * The component handles asynchronous authentication responses distinctly, such as preloaded
+ * passkey states or authentication failures, and redirects authenticated users to the replays page.
+ */
 export default function LoginCard() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();

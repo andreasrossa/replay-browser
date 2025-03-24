@@ -29,6 +29,17 @@ import { type DialogProps } from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+/**
+ * Displays a dialog for creating a new collector associated with a venue.
+ *
+ * This component renders a form within a modal dialog that allows users to provide a unique identifier (UID)
+ * and an optional description to create a new collector. It leverages form validation and optimistic UI updates
+ * through an API mutation. On a successful creation, it refreshes the collector list, shows a success notification,
+ * resets the form, and closes the dialog. If an error occurs, it handles validation feedback or reverts the optimistic update.
+ *
+ * @param venueUID - The unique identifier of the venue where the collector is being added.
+ * @param dialogProps - Properties to control the dialog's state and behavior.
+ */
 export default function CreateCollectorDialog({
   venueUID,
   dialogProps,

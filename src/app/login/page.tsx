@@ -3,6 +3,14 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import LoginCard from "./_components/login-card";
 
+/**
+ * Renders the login page and manages user session redirection.
+ *
+ * This asynchronous component retrieves the current user session. If a session is active, it immediately redirects
+ * the user to the "/replays" page. Otherwise, it returns a JSX structure containing the login interface.
+ *
+ * @returns A JSX element displaying the login card when no active session is found.
+ */
 export default async function LoginPage() {
   const session = await auth.api.getSession({
     headers: await headers(),

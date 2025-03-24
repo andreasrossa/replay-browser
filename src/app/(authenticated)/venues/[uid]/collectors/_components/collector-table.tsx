@@ -20,6 +20,15 @@ import CreateCollectorDialog from "./dialog/create-collector-dialog";
 
 const columnHelper = createColumnHelper<CollectorDTO>();
 
+/**
+ * Displays a searchable table of collectors for the specified venue.
+ *
+ * This component fetches collector data using a TRPC query and renders it in a table with columns for UID, description,
+ * and a creation date formatted to the "de-DE" locale. It includes a global search input for filtering the table,
+ * row-specific action buttons via a dropdown, and a dialog for creating new collectors.
+ *
+ * @param venueUID - The unique identifier of the venue whose collectors are displayed.
+ */
 export default function CollectorTable({ venueUID }: { venueUID: string }) {
   const [globalFilter, setGlobalFilter] = useState("");
 

@@ -13,6 +13,19 @@ import {
 } from "../ui/dropdown-menu";
 import { Skeleton } from "../ui/skeleton";
 
+/**
+ * Renders a sidebar user menu for managing authentication actions.
+ *
+ * This React component checks the current session state:
+ * - While the session is pending, it displays a loading state with skeleton loaders.
+ * - Once the session is resolved, it renders a dropdown menu showing the user's email and two actions:
+ *   - "Add Passkey": Initiates an asynchronous operation to add a passkey, displaying a toast on success or logging an error and showing an error toast on failure.
+ *   - "Sign out": Signs the user out and redirects to the home page on success, with similar error feedback on failure.
+ *
+ * @example
+ * // In a sidebar component:
+ * <SidebarUserMenu />
+ */
 export function SidebarUserMenu() {
   const session = authClient.useSession();
   const router = useRouter();
