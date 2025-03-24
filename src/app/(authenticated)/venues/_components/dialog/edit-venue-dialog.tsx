@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import LoadingButton from "@/components/util/loading-button";
 import {
   editVenueClientSchema,
   type EditVenueClientSchema,
@@ -26,7 +26,6 @@ import {
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type DialogProps } from "@radix-ui/react-dialog";
-import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -98,7 +97,7 @@ export default function EditVenueDialog({
     <Dialog {...dialogProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Venue {venueUID}</DialogTitle>
+          <DialogTitle>Edit venue {venueUID}</DialogTitle>
           <DialogDescription>
             Edit the description of the venue.
           </DialogDescription>
@@ -128,20 +127,14 @@ export default function EditVenueDialog({
           </form>
         </Form>
         <DialogFooter>
-          <Button
-            disabled={mutation.isPending}
+          <LoadingButton
+            isLoading={mutation.isPending}
             className="ml-auto"
             type="submit"
             form="edit-venue-form"
           >
-            {mutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...
-              </>
-            ) : (
-              "Update Venue"
-            )}
-          </Button>
+            Edit venue
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

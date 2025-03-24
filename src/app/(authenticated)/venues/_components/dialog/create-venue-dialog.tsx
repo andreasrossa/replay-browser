@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -20,20 +18,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import LoadingButton from "@/components/util/loading-button";
 import { type CreateVenueSchema, createVenueSchema } from "@/schemas/venue";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { type DialogProps } from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function CreateVenueDialog({
-  children,
+  dialogProps,
 }: {
-  children: React.ReactNode;
+  dialogProps: DialogProps;
 }) {
-  const [open, setOpen] = useState(false);
   const utils = api.useUtils();
   const mutation = api.venue.create.useMutation({
     onMutate: async ({ uid, description }) => {
@@ -72,7 +69,7 @@ export default function CreateVenueDialog({
       void utils.venue.list.invalidate();
       toast.success("Venue created successfully");
       form.reset();
-      setOpen(false);
+      dialogProps.onOpenChange?.(false);
     },
   });
 
@@ -92,8 +89,7 @@ export default function CreateVenueDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog {...dialogProps}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add a new venue</DialogTitle>
@@ -142,20 +138,14 @@ export default function CreateVenueDialog({
           </form>
         </Form>
         <DialogFooter>
-          <Button
-            disabled={mutation.isPending}
+          <LoadingButton
+            isLoading={mutation.isPending}
             className="ml-auto"
             type="submit"
             form="create-venue-form"
           >
-            {mutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-              </>
-            ) : (
-              "Add Venue"
-            )}
-          </Button>
+            Add venue
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

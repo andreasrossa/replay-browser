@@ -20,7 +20,7 @@ export default async function VenuesPage() {
     <HydrateClient>
       <Card className="mx-auto w-full max-w-6xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Bruh</CardTitle>
+          <CardTitle className="text-2xl font-bold">Venues</CardTitle>
           <CardDescription>
             Manage your venues and their settings.
           </CardDescription>

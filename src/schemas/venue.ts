@@ -3,7 +3,7 @@ import { z } from "zod";
 export const venueUidSchema = z
   .string()
   .min(3, "UID must be at least 3 characters long")
-  .max(10, "UID must be less than 10 characters long")
+  .max(50, "UID must be at most 50 characters long")
   .regex(
     /^[a-z0-9_-]+$/,
     "Only lowercase letters, numbers, dashes, and underscores are allowed",
@@ -11,7 +11,7 @@ export const venueUidSchema = z
 
 export const venueDescriptionSchema = z
   .string()
-  .max(100, "Description must be less than 100 characters long")
+  .max(100, "Description must be at most 100 characters long")
   .optional();
 
 export const createVenueSchema = z.object({

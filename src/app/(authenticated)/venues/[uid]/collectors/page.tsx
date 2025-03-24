@@ -3,7 +3,7 @@ import { verifySession } from "@/lib/verify-session";
 import { z } from "zod";
 
 const paramsSchema = z.object({
-  id: z.coerce.number(),
+  uid: z.string(),
 });
 
 export default async function CollectorsPage({
@@ -21,5 +21,5 @@ export default async function CollectorsPage({
     return <NotFoundPageError />;
   }
 
-  return <div>CollectorsPage for Venue #{parsedParams.id}</div>;
+  return <div>CollectorsPage for Venue {parsedParams.uid}</div>;
 }
