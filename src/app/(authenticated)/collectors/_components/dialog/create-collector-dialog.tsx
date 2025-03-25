@@ -20,8 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import LoadingButton from "@/components/util/loading-button";
 import {
-  createCollectorPublicSchema,
-  type CreateCollectorPublicSchema,
+  createCollectorSchema,
+  type CreateCollectorSchemaInput,
 } from "@/schemas/collector";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,29 +30,22 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function CreateCollectorDialog({
-  venueUID,
   dialogProps,
 }: {
-  venueUID: string;
   dialogProps: DialogProps;
 }) {
   const utils = api.useUtils();
   const mutation = api.collector.create.useMutation({
-    onMutate: async ({ venueUID, uid, description }) => {
+    onMutate: async ({ uid, displayName }) => {
       // cancel any outgoing refetches
-      await utils.collector.listForVenue.cancel({
-        venueUID,
-      });
+      await utils.collector.list.cancel();
       // snapshot the previous value
-      const prevData = utils.collector.listForVenue.getData({
-        venueUID,
-      });
+      const prevData = utils.collector.list.getData();
       // optimistic update
-      utils.collector.listForVenue.setData({ venueUID }, (prev) => [
+      utils.collector.list.setData(undefined, (prev) => [
         {
           uid,
-          description: description ?? null,
-          venueUID,
+          displayName: displayName ?? null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -61,43 +54,40 @@ export default function CreateCollectorDialog({
 
       return { prevData };
     },
-    onError: (error, { venueUID }, ctx) => {
+    onError: (error, _, ctx) => {
       if (error.data?.zodError) {
         Object.entries(error.data.zodError.fieldErrors).forEach(
           ([field, error]) => {
-            form.setError(field as keyof CreateCollectorPublicSchema, {
+            form.setError(field as keyof CreateCollectorSchemaInput, {
               message: error?.[0],
             });
           },
         );
       } else {
-        utils.collector.listForVenue.setData({ venueUID }, ctx?.prevData);
+        utils.collector.list.setData(undefined, ctx?.prevData);
         toast.error("Failed to create collector");
       }
     },
-    onSuccess: (data) => {
-      void utils.collector.listForVenue.invalidate({
-        venueUID: data?.venueUID,
-      });
+    onSuccess: () => {
+      void utils.collector.list.invalidate();
       toast.success("Collector created successfully");
       form.reset();
       dialogProps.onOpenChange?.(false);
     },
   });
 
-  const form = useForm<CreateCollectorPublicSchema>({
-    resolver: zodResolver(createCollectorPublicSchema),
+  const form = useForm<CreateCollectorSchemaInput>({
+    resolver: zodResolver(createCollectorSchema),
     defaultValues: {
       uid: "",
-      description: "",
+      displayName: "",
     },
   });
 
-  const onSubmit = (data: CreateCollectorPublicSchema) => {
+  const onSubmit = (data: CreateCollectorSchemaInput) => {
     mutation.mutate({
-      venueUID,
       uid: data.uid,
-      description: data.description,
+      displayName: data.displayName,
     });
   };
 
@@ -126,7 +116,7 @@ export default function CreateCollectorDialog({
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>
-                    The UID is a unique identifier for the collector.
+                    A unique identifier for the collector.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -134,10 +124,10 @@ export default function CreateCollectorDialog({
             />
             <FormField
               control={form.control}
-              name="description"
+              name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
+                  <FormLabel>Display Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>

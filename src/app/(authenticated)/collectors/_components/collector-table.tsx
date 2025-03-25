@@ -20,7 +20,7 @@ import CreateCollectorDialog from "./dialog/create-collector-dialog";
 
 const columnHelper = createColumnHelper<CollectorDTO>();
 
-export default function CollectorTable({ venueUID }: { venueUID: string }) {
+export default function CollectorTable() {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const columns = useMemo(
@@ -28,8 +28,8 @@ export default function CollectorTable({ venueUID }: { venueUID: string }) {
       columnHelper.accessor("uid", {
         header: "UID",
       }),
-      columnHelper.accessor("description", {
-        header: "Description",
+      columnHelper.accessor("displayName", {
+        header: "Display Name",
       }),
       columnHelper.accessor("createdAt", {
         header: "Created At",
@@ -52,9 +52,7 @@ export default function CollectorTable({ venueUID }: { venueUID: string }) {
     [],
   );
 
-  const [data] = api.collector.listForVenue.useSuspenseQuery({
-    venueUID,
-  });
+  const [data] = api.collector.list.useSuspenseQuery();
 
   const table = useReactTable({
     data,
@@ -78,7 +76,7 @@ export default function CollectorTable({ venueUID }: { venueUID: string }) {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <Input
-          placeholder="Search"
+          placeholder="Search collectors"
           className="max-w-[250px]"
           onChange={(e) => setGlobalFilter(e.target.value)}
           value={globalFilter}
@@ -88,10 +86,7 @@ export default function CollectorTable({ venueUID }: { venueUID: string }) {
         </Button>
       </div>
       <DataTable table={table} />
-      <CreateCollectorDialog
-        dialogProps={createCollectorDialog.props}
-        venueUID={venueUID}
-      />
+      <CreateCollectorDialog dialogProps={createCollectorDialog.props} />
     </div>
   );
 }

@@ -20,76 +20,72 @@ import {
 import { Input } from "@/components/ui/input";
 import LoadingButton from "@/components/util/loading-button";
 import {
-  editVenueClientSchema,
-  type EditVenueClientSchema,
-} from "@/schemas/venue";
+  editCollectorSchema,
+  type EditCollectorSchemaInput,
+} from "@/schemas/collector";
+import { type CollectorDTO } from "@/server/db/schema";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export default function EditVenueDialog({
-  venueUID,
+export default function EditCollectorDialog({
   dialogProps,
+  collector,
 }: {
-  venueUID: string;
   dialogProps: DialogProps;
+  collector: CollectorDTO;
 }) {
   const utils = api.useUtils();
-  const mutation = api.venue.editDescription.useMutation({
-    onMutate: async ({ uid, description }) => {
+  const mutation = api.collector.update.useMutation({
+    onMutate: async ({ uid, displayName }) => {
       // cancel any outgoing refetches
-      await utils.venue.list.cancel();
+      await utils.collector.list.cancel();
       // snapshot the previous value
-      const prevData = utils.venue.list.getData();
+      const prevData = utils.collector.list.getData();
       // optimistic update
-      utils.venue.list.setData(undefined, (prev) => {
-        return (
-          prev?.map((venue) => {
-            if (venue.uid === uid) {
-              return { ...venue, description: description ?? null };
-            }
-            return venue;
-          }) ?? []
+      utils.collector.list.setData(undefined, (prev) => {
+        return prev?.map((collector) =>
+          collector.uid === uid ? { ...collector, displayName } : collector,
         );
       });
 
       return { prevData };
     },
-    onError: (error, _newVenue, ctx) => {
+    onError: (error, _, ctx) => {
       if (error.data?.zodError) {
         Object.entries(error.data.zodError.fieldErrors).forEach(
           ([field, error]) => {
-            form.setError(field as keyof EditVenueClientSchema, {
+            form.setError(field as keyof EditCollectorSchemaInput, {
               message: error?.[0],
             });
           },
         );
       } else {
-        utils.venue.list.setData(undefined, ctx?.prevData);
-        toast.error("Failed to update venue");
+        utils.collector.list.setData(undefined, ctx?.prevData);
+        toast.error("Failed to update collector");
       }
     },
     onSuccess: () => {
-      void utils.venue.list.invalidate();
-      toast.success("Venue updated successfully");
+      void utils.collector.list.invalidate();
+      toast.success("Collector updated successfully");
       form.reset();
       dialogProps.onOpenChange?.(false);
     },
   });
 
-  const form = useForm<EditVenueClientSchema>({
-    resolver: zodResolver(editVenueClientSchema),
+  const form = useForm<EditCollectorSchemaInput>({
+    resolver: zodResolver(editCollectorSchema),
     defaultValues: {
-      description: "",
+      displayName: collector.displayName,
     },
   });
 
-  const onSubmit = (data: EditVenueClientSchema) => {
+  const onSubmit = (data: EditCollectorSchemaInput) => {
     mutation.mutate({
-      uid: venueUID,
-      description: data.description,
+      uid: collector.uid,
+      displayName: data.displayName,
     });
   };
 
@@ -97,28 +93,28 @@ export default function EditVenueDialog({
     <Dialog {...dialogProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit venue {venueUID}</DialogTitle>
+          <DialogTitle>Edit collector</DialogTitle>
           <DialogDescription>
-            Edit the description of the venue.
+            Edit the display name of the collector {collector.displayName}.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form
-            id="edit-venue-form"
+            id="edit-collector-form"
             className="space-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
               control={form.control}
-              name="description"
+              name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Display Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>
-                    A description for the venue (optional)
+                    The display name of the collector.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -131,9 +127,9 @@ export default function EditVenueDialog({
             isLoading={mutation.isPending}
             className="ml-auto"
             type="submit"
-            form="edit-venue-form"
+            form="edit-collector-form"
           >
-            Edit venue
+            Update
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

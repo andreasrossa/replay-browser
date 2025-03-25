@@ -8,18 +8,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDialog } from "@/hooks/use-dialog";
-import { type VenueDTO } from "@/server/db/schema";
-import { CpuIcon, PencilIcon, TrashIcon } from "lucide-react";
-import Link from "next/link";
-import DeleteVenueDialog from "./dialog/delete-venue-dialog";
-import EditVenueDialog from "./dialog/edit-venue-dialog";
+import { type CollectorDTO } from "@/server/db/schema/collector";
+import { KeyIcon, PencilIcon, TrashIcon } from "lucide-react";
+import DeleteCollectorDialog from "./dialog/delete-collector-dialog";
+import EditCollectorDialog from "./dialog/edit-collector-dialog";
 
-export default function VenueActions({
-  venue,
+export default function CollectorActions({
+  collector,
   children,
   side = "left",
 }: {
-  venue: VenueDTO;
+  collector: CollectorDTO;
   children: React.ReactNode;
   side?: "left" | "right" | "top" | "bottom";
 }) {
@@ -31,17 +30,15 @@ export default function VenueActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent side={side}>
-          <DropdownMenuItem asChild>
-            <Link href={`/venues/${venue.uid}/collectors`}>
-              <CpuIcon className="h-3 w-3" />
-              Collectors
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={editDialog.trigger}>
             <PencilIcon className="h-3 w-3" />
             Edit
           </DropdownMenuItem>
+          <DropdownMenuItem>
+            <KeyIcon className="h-3 w-3" />
+            Regenerate Secret
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-red-500"
             onSelect={deleteDialog.trigger}
@@ -51,10 +48,13 @@ export default function VenueActions({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <EditVenueDialog venueUID={venue.uid} dialogProps={editDialog.props} />
-      <DeleteVenueDialog
-        venueUID={venue.uid}
+      <DeleteCollectorDialog
         dialogProps={deleteDialog.props}
+        collector={collector}
+      />
+      <EditCollectorDialog
+        dialogProps={editDialog.props}
+        collector={collector}
       />
     </>
   );

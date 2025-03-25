@@ -22,9 +22,9 @@ const items: SidebarItem[] = [
     href: "/replays",
   },
   {
-    title: "Venues",
+    title: "Collectors",
     icon: HouseIcon,
-    href: "/venues",
+    href: "/collectors",
     condition: (session) => session?.user.role === "admin",
   },
 ];
