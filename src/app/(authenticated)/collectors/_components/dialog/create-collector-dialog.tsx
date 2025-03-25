@@ -36,25 +36,7 @@ export default function CreateCollectorDialog({
 }) {
   const utils = api.useUtils();
   const mutation = api.collector.create.useMutation({
-    onMutate: async ({ uid, displayName }) => {
-      // cancel any outgoing refetches
-      await utils.collector.list.cancel();
-      // snapshot the previous value
-      const prevData = utils.collector.list.getData();
-      // optimistic update
-      utils.collector.list.setData(undefined, (prev) => [
-        {
-          uid,
-          displayName: displayName ?? null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        ...(prev ?? []),
-      ]);
-
-      return { prevData };
-    },
-    onError: (error, _, ctx) => {
+    onError: (error, _) => {
       if (error.data?.zodError) {
         Object.entries(error.data.zodError.fieldErrors).forEach(
           ([field, error]) => {
@@ -64,7 +46,6 @@ export default function CreateCollectorDialog({
           },
         );
       } else {
-        utils.collector.list.setData(undefined, ctx?.prevData);
         toast.error("Failed to create collector");
       }
     },

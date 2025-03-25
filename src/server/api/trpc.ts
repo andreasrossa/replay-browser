@@ -14,6 +14,7 @@ import { auth, type Role } from "@/lib/auth";
 import { db } from "@/server/db";
 import { collector as collectorTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { decrypt } from "../utils/generate-secret";
 /**
  * 1. CONTEXT
  *
@@ -154,8 +155,11 @@ export const protectedCollectorProcedure = t.procedure.use(
     if (!collectorSecret) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
+
+    const decryptedSecret = decrypt(collectorSecret);
+
     const collector = await db.query.collector.findFirst({
-      where: eq(collectorTable.secret, collectorSecret),
+      where: eq(collectorTable.secret, decryptedSecret),
     });
 
     if (!collector) {

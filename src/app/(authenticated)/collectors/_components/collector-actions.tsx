@@ -12,6 +12,7 @@ import { type CollectorDTO } from "@/server/db/schema/collector";
 import { KeyIcon, PencilIcon, TrashIcon } from "lucide-react";
 import DeleteCollectorDialog from "./dialog/delete-collector-dialog";
 import EditCollectorDialog from "./dialog/edit-collector-dialog";
+import RegenerateCollectorSecretDialog from "./dialog/regenerate-collector-secret-dialog";
 
 export default function CollectorActions({
   collector,
@@ -24,6 +25,7 @@ export default function CollectorActions({
 }) {
   const editDialog = useDialog();
   const deleteDialog = useDialog();
+  const regenerateSecretDialog = useDialog();
 
   return (
     <>
@@ -34,7 +36,7 @@ export default function CollectorActions({
             <PencilIcon className="h-3 w-3" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onSelect={regenerateSecretDialog.trigger}>
             <KeyIcon className="h-3 w-3" />
             Regenerate Secret
           </DropdownMenuItem>
@@ -54,6 +56,10 @@ export default function CollectorActions({
       />
       <EditCollectorDialog
         dialogProps={editDialog.props}
+        collector={collector}
+      />
+      <RegenerateCollectorSecretDialog
+        dialogProps={regenerateSecretDialog.props}
         collector={collector}
       />
     </>
