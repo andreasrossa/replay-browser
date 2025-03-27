@@ -15,10 +15,10 @@ There is a _collector_ component written in Elixir as well, it will be linked he
 
 # TODO
 
-- [ ] Remove venues page and db schema
-- [ ] Check for unique UID in create collector procedure
-- [ ] Add encryption for collector secrets in db
-- [ ] Add API routes to post replay start/end events
+- [/] Add API routes to post replay start/end events
+- [ ] implement api calls in collector for replay start/end events
+- [ ] show modal with token when collector is created
+- [ ] show modal with token when collector token is regenerated
 - [ ] Live Replay Updates
   - [ ] Add socket.io server for websocket connection
   - [ ] Push replay events to redis on collector
