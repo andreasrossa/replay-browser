@@ -40,14 +40,22 @@ export function encrypt(text: string): string {
 
 export function decrypt(text: string): string {
   const parts = text.split(":");
+  if (parts.length !== 3) {
+    throw new Error("Invalid encrypted text format");
+  }
   const iv = Buffer.from(parts[0]!, "hex");
   const encryptedText = Buffer.from(parts[1]!, "hex");
   const authTag = Buffer.from(parts[2]!, "hex");
-  const decipher = crypto.createDecipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
-  decipher.setAuthTag(authTag);
-  return (
-    decipher.update(encryptedText, undefined, "utf8") + decipher.final("utf8")
-  );
+
+  try {
+    const decipher = crypto.createDecipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
+    decipher.setAuthTag(authTag);
+    return (
+      decipher.update(encryptedText, undefined, "utf8") + decipher.final("utf8")
+    );
+  } catch (error) {
+    throw new Error("Failed to decrypt text", { cause: error });
+  }
 }
 
 export function hashSecret(text: string): string {
