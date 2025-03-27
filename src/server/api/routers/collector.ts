@@ -5,10 +5,9 @@ import {
 } from "@/schemas/collector";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 import { collector } from "@/server/db/schema/collector";
-import { encrypt, generateSecret } from "@/server/utils/generate-secret";
+import { generateSecret, hashSecret } from "@/server/utils/generate-secret";
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
-import crypto from "node:crypto";
 import { z } from "zod";
 
 const publicValueSelect = {
@@ -31,12 +30,14 @@ export const collectorRouter = createTRPCRouter({
   create: adminProcedure
     .input(createCollectorSchema)
     .mutation(async ({ ctx: { db }, input }) => {
+      const secret = generateSecret();
+      const hashedSecret = hashSecret(secret);
       const [createdCollector] = await db
         .insert(collector)
         .values({
           uid: input.uid,
           displayName: input.displayName,
-          secret: generateSecret(),
+          secret: hashedSecret,
         })
         .returning();
 
@@ -47,7 +48,10 @@ export const collectorRouter = createTRPCRouter({
         });
       }
 
-      return createdCollector;
+      return {
+        ...createdCollector,
+        secret,
+      };
     }),
   update: adminProcedure
     .input(editCollectorServerSchema)
@@ -92,13 +96,13 @@ export const collectorRouter = createTRPCRouter({
         });
       }
 
-      const newSecret = crypto.randomBytes(64).toString("hex");
-      const encryptedSecret = encrypt(newSecret);
+      const newSecret = generateSecret();
+      const hashedSecret = hashSecret(newSecret);
 
       const [updatedCollector] = await db
         .update(collector)
         .set({
-          secret: encryptedSecret,
+          secret: hashedSecret,
           secretExpiresAt: new Date(
             Date.now() + env.COLLECTOR_SECRET_EXPIRATION_TIME_SECONDS * 1000,
           ),

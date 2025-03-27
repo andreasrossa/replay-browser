@@ -50,6 +50,10 @@ export function decrypt(text: string): string {
   );
 }
 
-export function generateSecret(input?: string): string {
-  return encrypt(input ?? crypto.randomBytes(64).toString("hex"));
+export function hashSecret(text: string): string {
+  return crypto.createHash("sha256").update(text).digest("hex");
+}
+
+export function generateSecret(): string {
+  return crypto.randomBytes(64).toString("hex");
 }
