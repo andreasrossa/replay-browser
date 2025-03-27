@@ -10,13 +10,15 @@ import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
-const publicValueSelect = {
+const publicValueSelect: Partial<
+  Record<keyof typeof collector.$inferSelect, boolean>
+> = {
   uid: true,
   displayName: true,
   createdAt: true,
   updatedAt: true,
   secretExpiresAt: true,
-} as const;
+};
 
 export const collectorRouter = createTRPCRouter({
   list: adminProcedure.query(async ({ ctx: { db } }) => {
@@ -112,8 +114,8 @@ export const collectorRouter = createTRPCRouter({
 
       if (!updatedCollector) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to regenerate collector secret",
+          code: "BAD_REQUEST",
+          message: "Collector not found",
         });
       }
 
