@@ -156,14 +156,19 @@ export const protectedCollectorProcedure = t.procedure.use(
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
-    const collector = await db.query.collector.findFirst({
-      where: eq(collectorTable.secret, hashSecret(collectorSecret)),
-    });
+    try {
+      const collector = await db.query.collector.findFirst({
+        where: eq(collectorTable.secret, hashSecret(collectorSecret)),
+      });
 
-    if (!collector) {
+      if (!collector) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return next({ ctx: { collector } });
+    } catch (error) {
+      console.error(error);
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
-
-    return next({ ctx: { collector } });
   },
 );
