@@ -6,18 +6,15 @@ meta {
 
 post {
   url: {{base}}/api/replay/start
-  body: json
+  body: multipartForm
   auth: inherit
 }
 
 headers {
-  X-Collector-Token: b3fdf5099cb19caf938a50ec02ec7470231a27fd821bd087d09105e895e901c079e3e08f0787794e26c67659f923b7c922aefa946bcfaf1726d04884952a4756
+  x-collector-token: 76da6a2bd54b1c225768941ddcce6d7c8a74fd18e9a76885d85d48825848e8623f449324a1e1035957ed848522dbd7bc74898330fcdeea935e2a7911456f8b93
 }
 
-body:json {
-  {
-    "stageId": 12,
-    "characterIds": [1,2],
-    "startedAt": 1742338423539
-  }
+body:multipart-form {
+  metadata: {"wiiMacAddress": "01:23:45:67:89:AB", "stageId":12,"characterIds":[1,2],"startedAt":1742338423539}
+  file: @file(/Users/andreasrossa/dev_old/replay_collector_with_slippijs/collector/replays/1_1742855758.slp)
 }

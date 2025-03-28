@@ -18,6 +18,11 @@ export const env = createEnv({
     COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS: z.coerce
       .number()
       .default(60 * 60 * 24 * 365), // 365 days
+    // Minio
+    MINIO_ENDPOINT: z.string(),
+    MINIO_PORT: z.coerce.number().optional(),
+    MINIO_ACCESS_KEY: z.string(),
+    MINIO_SECRET_KEY: z.string(),
   },
 
   /**
@@ -41,6 +46,10 @@ export const env = createEnv({
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
     COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS:
       process.env.COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS,
+    MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,
+    MINIO_PORT: process.env.MINIO_PORT,
+    MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
+    MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
