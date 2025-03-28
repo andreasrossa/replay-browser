@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { useDialog } from "@/hooks/use-dialog";
-import type { VenueDTO } from "@/server/db/schema";
+import { type CollectorDTO } from "@/server/db/schema/collector";
 import { api } from "@/trpc/react";
 import {
   createColumnHelper,
@@ -15,12 +15,12 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon, PlusIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import CreateVenueDialog from "./dialog/create-venue-dialog";
-import VenueActions from "./venue-actions";
+import CollectorActions from "./collector-actions";
+import CreateCollectorDialog from "./dialog/create-collector-dialog";
 
-const columnHelper = createColumnHelper<VenueDTO>();
+const columnHelper = createColumnHelper<CollectorDTO>();
 
-export default function VenueTable() {
+export default function CollectorTable() {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const columns = useMemo(
@@ -28,8 +28,8 @@ export default function VenueTable() {
       columnHelper.accessor("uid", {
         header: "UID",
       }),
-      columnHelper.accessor("description", {
-        header: "Description",
+      columnHelper.accessor("displayName", {
+        header: "Display Name",
       }),
       columnHelper.accessor("createdAt", {
         header: "Created At",
@@ -40,11 +40,11 @@ export default function VenueTable() {
         header: "",
         cell: ({ row }) => (
           <div className="flex justify-end">
-            <VenueActions venue={row.original} side="bottom">
+            <CollectorActions collector={row.original} side="bottom">
               <Button variant="ghost" size="icon">
                 <MoreHorizontalIcon className="h-3 w-3" />
               </Button>
-            </VenueActions>
+            </CollectorActions>
           </div>
         ),
       }),
@@ -52,7 +52,7 @@ export default function VenueTable() {
     [],
   );
 
-  const [data] = api.venue.list.useSuspenseQuery();
+  const [data] = api.collector.list.useSuspenseQuery();
 
   const table = useReactTable({
     data,
@@ -70,23 +70,23 @@ export default function VenueTable() {
     },
   });
 
-  const createVenueDialog = useDialog();
+  const createCollectorDialog = useDialog();
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <Input
-          placeholder="Search"
+          placeholder="Search collectors"
           className="max-w-[250px]"
           onChange={(e) => setGlobalFilter(e.target.value)}
           value={globalFilter}
         />
-        <Button onClick={createVenueDialog.trigger}>
-          <PlusIcon /> Add Venue
+        <Button onClick={createCollectorDialog.trigger}>
+          <PlusIcon /> Add Collector
         </Button>
       </div>
       <DataTable table={table} />
-      <CreateVenueDialog dialogProps={createVenueDialog.props} />
+      <CreateCollectorDialog dialogProps={createCollectorDialog.props} />
     </div>
   );
 }

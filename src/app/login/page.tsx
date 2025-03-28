@@ -1,17 +1,14 @@
 import { auth } from "@/lib/auth";
-import LoginCard from "./_components/login-card";
-import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import LoginCard from "./_components/login-card";
 
 export default async function LoginPage() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  console.log("session", session);
 
   if (session !== null) {
-    console.log("redirecting to /replays");
     redirect("/replays");
   }
 

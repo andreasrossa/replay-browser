@@ -12,8 +12,9 @@ import { ZodError } from "zod";
 
 import { auth, type Role } from "@/lib/auth";
 import { db } from "@/server/db";
-import { venue as venueTable } from "@/server/db/schema";
+import { collector as collectorTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { hashToken } from "../utils/generate-token";
 /**
  * 1. CONTEXT
  *
@@ -143,25 +144,31 @@ export const adminProcedure = protectedProcedure.use(
 );
 
 /**
- * Venue Procedure
+ * Collector Procedure
  *
- * Protected procedure that reads the venue secret from the request headers.
+ * Protected procedure that reads the collector token from the request headers.
  */
-export const protectedVenueProcedure = t.procedure.use(
+export const protectedCollectorProcedure = t.procedure.use(
   async ({ next, ctx }) => {
     const { headers } = ctx;
-    const venueSecret = headers.get("x-venue-secret");
-    if (!venueSecret) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    const venue = await db.query.venue.findFirst({
-      where: eq(venueTable.secret, venueSecret),
-    });
-
-    if (!venue) {
+    const collectorToken = headers.get("x-collector-token");
+    if (!collectorToken) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
-    return next({ ctx: { venue } });
+    try {
+      const collector = await db.query.collector.findFirst({
+        where: eq(collectorTable.token, hashToken(collectorToken)),
+      });
+
+      if (!collector) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return next({ ctx: { collector } });
+    } catch (error) {
+      console.error(error);
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
   },
 );

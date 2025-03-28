@@ -69,8 +69,8 @@ export default function LoginCard() {
       return;
     }
 
-    PublicKeyCredential.isConditionalMediationAvailable().then(
-      (isAvailable) => {
+    PublicKeyCredential.isConditionalMediationAvailable()
+      .then((isAvailable) => {
         if (!isAvailable) {
           return;
         }
@@ -99,9 +99,11 @@ export default function LoginCard() {
           .catch((error) => {
             console.error("Failed to preload passkey", error);
           });
-      },
-    );
-  }, []);
+      })
+      .catch((error) => {
+        console.error("Failed to check if passkey is available", error);
+      });
+  }, [router]);
 
   return (
     <Card>

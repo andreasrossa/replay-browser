@@ -1,5 +1,5 @@
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { venue } from "./venue";
+import { collector } from "./collector";
 
 export const replay = pgTable("replay", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
@@ -11,9 +11,9 @@ export const replay = pgTable("replay", {
   stageId: integer("stage_id").notNull(),
   characterIds: integer("character_ids").array().notNull(),
   replayFileUrl: text("replay_file_url"),
-  venueUid: text("venue_uid")
+  collectorUID: text("collector_uid")
     .notNull()
-    .references(() => venue.uid, { onDelete: "cascade" }),
+    .references(() => collector.uid, { onDelete: "cascade" }),
 });
 
 export type ReplayDTO = typeof replay.$inferSelect;

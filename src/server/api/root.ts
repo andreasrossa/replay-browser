@@ -1,6 +1,6 @@
 import { replayRouter } from "@/server/api/routers/replay";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
-import { venueRouter } from "./routers/venue";
+import { collectorRouter } from "./routers/collector";
 
 /**
  * This is the primary router for your server.
@@ -9,7 +9,7 @@ import { venueRouter } from "./routers/venue";
  */
 export const appRouter = createTRPCRouter({
   replay: replayRouter,
-  venue: venueRouter,
+  collector: collectorRouter,
 });
 
 // export type definition of API

@@ -7,26 +7,28 @@ import {
 } from "@/components/ui/card";
 import { verifySession } from "@/lib/verify-session";
 import { api, HydrateClient } from "@/trpc/server";
-import VenueTable from "./_components/venue-table";
+import CollectorTable from "./_components/collector-table";
 
-export default async function VenuesPage() {
+export default async function CollectorsPage() {
   await verifySession({
     hasRoles: ["admin"],
   });
 
-  void api.venue.list.prefetch();
+  void api.collector.list.prefetch();
 
   return (
     <HydrateClient>
       <Card className="mx-auto w-full max-w-6xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Venues</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Manage Collectors
+          </CardTitle>
           <CardDescription>
-            Manage your venues and their settings.
+            {`Collectors connect to on or multiple Wii consoles and receive replay data.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <VenueTable />
+          <CollectorTable />
         </CardContent>
       </Card>
     </HydrateClient>

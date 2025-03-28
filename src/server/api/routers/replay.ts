@@ -1,25 +1,30 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedVenueProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedCollectorProcedure,
+} from "@/server/api/trpc";
 import { replay } from "@/server/db/schema";
 
 export const replayRouter = createTRPCRouter({
-  start: protectedVenueProcedure
+  start: protectedCollectorProcedure
     .input(
       z.object({
         startedAt: z.coerce.date(),
         stageId: z.number(),
         characterIds: z.array(z.number()),
+        console: z.any(),
       }),
     )
-    .mutation(async ({ ctx: { db, venue }, input }) => {
+    .mutation(async ({ ctx: { db, collector }, input }) => {
+      console.log(input);
       const [startedReplay] = await db
         .insert(replay)
         .values({
           startedAt: input.startedAt,
           stageId: input.stageId,
           characterIds: input.characterIds,
-          venueUid: venue.uid,
+          collectorUID: collector.uid,
         })
         .returning({ id: replay.id });
 

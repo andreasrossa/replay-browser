@@ -8,32 +8,31 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/util/loading-button";
+import { type CollectorDTO } from "@/server/db/schema/collector";
 import { api } from "@/trpc/react";
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 
-export default function DeleteVenueDialog({
-  venueUID,
+export default function DeleteCollectorDialog({
+  collector,
   dialogProps,
 }: {
-  venueUID: string;
+  collector: CollectorDTO;
   dialogProps: DialogProps;
 }) {
   const utils = api.useUtils();
-
-  const mutation = api.venue.delete.useMutation({
-    onError: () => {
-      toast.error("Failed to delete venue");
-    },
+  const deleteCollector = api.collector.delete.useMutation({
     onSuccess: () => {
-      void utils.venue.list.invalidate();
-      toast.success("Venue deleted successfully");
-      dialogProps.onOpenChange?.(false);
+      void utils.collector.list.invalidate();
+      toast.success(`Collector ${collector.displayName} deleted`);
+    },
+    onError: () => {
+      toast.error("Failed to delete collector");
     },
   });
 
   const handleDelete = () => {
-    mutation.mutate({ uid: venueUID });
+    deleteCollector.mutate({ uid: collector.uid });
   };
 
   return (
@@ -42,15 +41,16 @@ export default function DeleteVenueDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            {`This will delete the venue '${venueUID}' and all associated data.`}
+            You are about to delete the collector {collector.displayName}. This
+            action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <LoadingButton
             variant="destructive"
+            isLoading={deleteCollector.isPending}
             onClick={handleDelete}
-            isLoading={mutation.isPending}
           >
             Delete
           </LoadingButton>

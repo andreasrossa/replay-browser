@@ -19,72 +19,56 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import LoadingButton from "@/components/util/loading-button";
-import { type CreateVenueSchema, createVenueSchema } from "@/schemas/venue";
+import {
+  createCollectorSchema,
+  type CreateCollectorSchemaInput,
+} from "@/schemas/collector";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export default function CreateVenueDialog({
+export default function CreateCollectorDialog({
   dialogProps,
 }: {
   dialogProps: DialogProps;
 }) {
   const utils = api.useUtils();
-  const mutation = api.venue.create.useMutation({
-    onMutate: async ({ uid, description }) => {
-      // cancel any outgoing refetches
-      await utils.venue.list.cancel();
-      // snapshot the previous value
-      const prevData = utils.venue.list.getData();
-      // optimistic update
-      utils.venue.list.setData(undefined, (prev) => [
-        {
-          uid,
-          description: description ?? null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        ...(prev ?? []),
-      ]);
-
-      return { prevData };
-    },
-    onError: (error, _newVenue, ctx) => {
+  const mutation = api.collector.create.useMutation({
+    onError: (error, _) => {
       if (error.data?.zodError) {
         Object.entries(error.data.zodError.fieldErrors).forEach(
           ([field, error]) => {
-            form.setError(field as keyof CreateVenueSchema, {
+            form.setError(field as keyof CreateCollectorSchemaInput, {
               message: error?.[0],
             });
           },
         );
       } else {
-        utils.venue.list.setData(undefined, ctx?.prevData);
-        toast.error("Failed to create venue");
+        toast.error("Failed to create collector");
       }
     },
     onSuccess: () => {
-      void utils.venue.list.invalidate();
-      toast.success("Venue created successfully");
+      void utils.collector.list.invalidate();
+      toast.success("Collector created successfully");
       form.reset();
       dialogProps.onOpenChange?.(false);
     },
   });
 
-  const form = useForm<CreateVenueSchema>({
-    resolver: zodResolver(createVenueSchema),
+  const form = useForm<CreateCollectorSchemaInput>({
+    resolver: zodResolver(createCollectorSchema),
     defaultValues: {
       uid: "",
-      description: "",
+      displayName: "",
     },
   });
 
-  const onSubmit = (data: CreateVenueSchema) => {
+  const onSubmit = (data: CreateCollectorSchemaInput) => {
     mutation.mutate({
       uid: data.uid,
-      description: data.description,
+      displayName: data.displayName,
     });
   };
 
@@ -92,14 +76,14 @@ export default function CreateVenueDialog({
     <Dialog {...dialogProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a new venue</DialogTitle>
+          <DialogTitle>Add a new collector</DialogTitle>
           <DialogDescription>
-            Create a new venue to start recording your replays.
+            Create a new collector to start recording your replays.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form
-            id="create-venue-form"
+            id="create-collector-form"
             className="space-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
           >
@@ -108,12 +92,12 @@ export default function CreateVenueDialog({
               name="uid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>UID *</FormLabel>
+                  <FormLabel>UID</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>
-                    A unique identifier for the venue
+                    A unique identifier for the collector.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -121,16 +105,13 @@ export default function CreateVenueDialog({
             />
             <FormField
               control={form.control}
-              name="description"
+              name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Display Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormDescription>
-                    A description for the venue (optional)
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -142,9 +123,9 @@ export default function CreateVenueDialog({
             isLoading={mutation.isPending}
             className="ml-auto"
             type="submit"
-            form="create-venue-form"
+            form="create-collector-form"
           >
-            Add venue
+            Add collector
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

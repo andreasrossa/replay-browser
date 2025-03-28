@@ -3,6 +3,7 @@
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { ChevronUpIcon, KeyIcon, LogOutIcon, UserIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -10,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
 
 export function SidebarUserMenu() {
@@ -40,9 +40,15 @@ export function SidebarUserMenu() {
       >
         <DropdownMenuItem
           onClick={() => {
-            authClient.passkey.addPasskey().then((res) => {
-              toast.success("Passkey added successfully!");
-            });
+            void authClient.passkey
+              .addPasskey()
+              .then((_res) => {
+                toast.success("Passkey added successfully!");
+              })
+              .catch((error) => {
+                console.error("Failed to add passkey", error);
+                toast.error("Failed to add passkey");
+              });
           }}
         >
           <KeyIcon className="size-4" />
