@@ -2,10 +2,10 @@ import "server-only";
 
 import crypto from "node:crypto";
 
-export function hashSecret(text: string): string {
+export function hashToken(text: string): string {
   return crypto.createHash("sha256").update(text).digest("hex");
 }
 
-export function generateSecret(): string {
+export function generateToken(): string {
   return crypto.randomBytes(64).toString("hex");
 }

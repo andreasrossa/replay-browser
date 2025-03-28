@@ -14,7 +14,7 @@ import { auth, type Role } from "@/lib/auth";
 import { db } from "@/server/db";
 import { collector as collectorTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import { hashSecret } from "../utils/generate-secret";
+import { hashToken } from "../utils/generate-token";
 /**
  * 1. CONTEXT
  *
@@ -144,21 +144,21 @@ export const adminProcedure = protectedProcedure.use(
 );
 
 /**
- * Venue Procedure
+ * Collector Procedure
  *
- * Protected procedure that reads the venue secret from the request headers.
+ * Protected procedure that reads the collector token from the request headers.
  */
 export const protectedCollectorProcedure = t.procedure.use(
   async ({ next, ctx }) => {
     const { headers } = ctx;
-    const collectorSecret = headers.get("x-collector-secret");
-    if (!collectorSecret) {
+    const collectorToken = headers.get("x-collector-token");
+    if (!collectorToken) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
     try {
       const collector = await db.query.collector.findFirst({
-        where: eq(collectorTable.secret, hashSecret(collectorSecret)),
+        where: eq(collectorTable.token, hashToken(collectorToken)),
       });
 
       if (!collector) {

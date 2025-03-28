@@ -9,10 +9,10 @@ export const collector = pgTable("collector", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
     () => new Date(),
   ),
-  secret: text("secret").notNull(),
-  secretExpiresAt: timestamp("secret_expires_at", { withTimezone: true })
+  token: text("token").notNull(),
+  tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });
 
-export type CollectorDTO = Omit<typeof collector.$inferSelect, "secret">;
+export type CollectorDTO = Omit<typeof collector.$inferSelect, "token">;

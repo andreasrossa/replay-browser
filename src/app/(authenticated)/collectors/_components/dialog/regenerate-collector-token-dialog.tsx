@@ -13,7 +13,7 @@ import { api } from "@/trpc/react";
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 
-export default function RegenerateCollectorSecretDialog({
+export default function RegenerateCollectorTokenDialog({
   collector,
   dialogProps,
 }: {
@@ -21,18 +21,18 @@ export default function RegenerateCollectorSecretDialog({
   dialogProps: DialogProps;
 }) {
   const utils = api.useUtils();
-  const regenerateSecret = api.collector.regenerateSecret.useMutation({
+  const regenerateToken = api.collector.regenerateToken.useMutation({
     onSuccess: () => {
       void utils.collector.list.invalidate();
-      toast.success(`Collector ${collector.displayName} secret regenerated`);
+      toast.success(`Collector ${collector.displayName} token regenerated`);
     },
     onError: () => {
-      toast.error("Failed to regenerate collector secret");
+      toast.error("Failed to regenerate collector token");
     },
   });
 
   const handleRegenerate = () => {
-    regenerateSecret.mutate({ uid: collector.uid });
+    regenerateToken.mutate({ uid: collector.uid });
   };
 
   return (
@@ -42,7 +42,7 @@ export default function RegenerateCollectorSecretDialog({
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
             You are about to regenerate the collector {collector.displayName}
-            secret. This will invalidate the current secret and generate a new
+            token. This will invalidate the current token and generate a new
             one.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -50,7 +50,7 @@ export default function RegenerateCollectorSecretDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <LoadingButton
             variant="destructive"
-            isLoading={regenerateSecret.isPending}
+            isLoading={regenerateToken.isPending}
             onClick={handleRegenerate}
           >
             Regenerate

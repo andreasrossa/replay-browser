@@ -15,8 +15,7 @@ export const env = createEnv({
     DISCORD_CLIENT_ID: z.string(),
     DISCORD_CLIENT_SECRET: z.string(),
     // Collector
-    COLLECTOR_SECRET_ENCRYPTION_KEY: z.string(),
-    COLLECTOR_SECRET_EXPIRATION_TIME_SECONDS: z.coerce
+    COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS: z.coerce
       .number()
       .default(60 * 60 * 24 * 365), // 365 days
   },
@@ -40,10 +39,8 @@ export const env = createEnv({
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
-    COLLECTOR_SECRET_ENCRYPTION_KEY:
-      process.env.COLLECTOR_SECRET_ENCRYPTION_KEY,
-    COLLECTOR_SECRET_EXPIRATION_TIME_SECONDS:
-      process.env.COLLECTOR_SECRET_EXPIRATION_TIME_SECONDS,
+    COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS:
+      process.env.COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -13,9 +13,11 @@ export const replayRouter = createTRPCRouter({
         startedAt: z.coerce.date(),
         stageId: z.number(),
         characterIds: z.array(z.number()),
+        console: z.any(),
       }),
     )
     .mutation(async ({ ctx: { db, collector }, input }) => {
+      console.log(input);
       const [startedReplay] = await db
         .insert(replay)
         .values({

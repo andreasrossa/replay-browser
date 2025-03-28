@@ -5,20 +5,18 @@ import {
 } from "@/schemas/collector";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 import { collector } from "@/server/db/schema/collector";
-import { generateSecret, hashSecret } from "@/server/utils/generate-secret";
+import { generateToken, hashToken } from "@/server/utils/generate-token";
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
-const publicValueSelect: Partial<
-  Record<keyof typeof collector.$inferSelect, boolean>
-> = {
+const publicValueSelect = {
   uid: true,
   displayName: true,
   createdAt: true,
   updatedAt: true,
-  secretExpiresAt: true,
-};
+  tokenExpiresAt: true,
+} as const;
 
 export const collectorRouter = createTRPCRouter({
   list: adminProcedure.query(async ({ ctx: { db } }) => {
@@ -43,14 +41,14 @@ export const collectorRouter = createTRPCRouter({
         });
       }
 
-      const secret = generateSecret();
-      const hashedSecret = hashSecret(secret);
+      const token = generateToken();
+      const hashedToken = hashToken(token);
       const [createdCollector] = await db
         .insert(collector)
         .values({
           uid: input.uid,
           displayName: input.displayName,
-          secret: hashedSecret,
+          token: hashedToken,
         })
         .returning();
 
@@ -63,7 +61,7 @@ export const collectorRouter = createTRPCRouter({
 
       return {
         ...createdCollector,
-        secret,
+        token,
       };
     }),
   update: adminProcedure
@@ -103,14 +101,14 @@ export const collectorRouter = createTRPCRouter({
         });
       }
     }),
-  regenerateSecret: adminProcedure
+  regenerateToken: adminProcedure
     .input(z.object({ uid: z.string() }))
     .mutation(async ({ ctx: { db }, input }) => {
-      const collectorToRegenerateSecret = await db.query.collector.findFirst({
+      const collectorToRegenerateToken = await db.query.collector.findFirst({
         where: eq(collector.uid, input.uid),
       });
 
-      if (!collectorToRegenerateSecret) {
+      if (!collectorToRegenerateToken) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Collector not found",
@@ -118,15 +116,15 @@ export const collectorRouter = createTRPCRouter({
       }
 
       try {
-        const newSecret = generateSecret();
-        const hashedSecret = hashSecret(newSecret);
+        const newToken = generateToken();
+        const hashedToken = hashToken(newToken);
 
         const [updatedCollector] = await db
           .update(collector)
           .set({
-            secret: hashedSecret,
-            secretExpiresAt: new Date(
-              Date.now() + env.COLLECTOR_SECRET_EXPIRATION_TIME_SECONDS * 1000,
+            token: hashedToken,
+            tokenExpiresAt: new Date(
+              Date.now() + env.COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS * 1000,
             ),
           })
           .where(eq(collector.uid, input.uid))
@@ -140,14 +138,14 @@ export const collectorRouter = createTRPCRouter({
         }
 
         return {
-          secret: newSecret,
-          secretExpiresAt: updatedCollector.secretExpiresAt,
+          token: newToken,
+          tokenExpiresAt: updatedCollector.tokenExpiresAt,
         };
       } catch (error) {
         console.error(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to regenerate collector secret",
+          message: "Failed to regenerate collector token",
         });
       }
     }),
