@@ -12,10 +12,23 @@ export async function POST(request: NextRequest) {
   const caller = createCaller(ctx);
 
   try {
-    const body = (await request.json()) as inferProcedureInput<
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
+    const metadata = formData.get("metadata") as string | null;
+
+    if (!metadata) {
+      return NextResponse.json("Metadata is required", { status: 400 });
+    }
+
+    if (!file) {
+      return NextResponse.json("File is required", { status: 400 });
+    }
+
+    const body = JSON.parse(metadata) as inferProcedureInput<
       AppRouter["replay"]["start"]
     >;
-    const replay = await caller.replay.start(body);
+
+    const replay = await caller.replay.start({ ...body, file });
     return NextResponse.json(replay);
   } catch (cause) {
     if (cause instanceof TRPCError) {

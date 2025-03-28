@@ -10,7 +10,7 @@ export const replay = pgTable("replay", {
   frameCount: integer("frame_count"),
   stageId: integer("stage_id").notNull(),
   characterIds: integer("character_ids").array().notNull(),
-  replayFileUrl: text("replay_file_url"),
+  fileId: text("file_id").notNull(),
   collectorUID: text("collector_uid")
     .notNull()
     .references(() => collector.uid, { onDelete: "cascade" }),
