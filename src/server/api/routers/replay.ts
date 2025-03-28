@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedCollectorProcedure,
@@ -8,23 +6,58 @@ import { db } from "@/server/db";
 import { replay } from "@/server/db/schema";
 import { minioClient } from "@/server/utils/minio";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { zfd } from "zod-form-data";
 
 const replayBucket = "replays";
+const replayFileSizeLimit = 50 * 1024 * 1024; // 50MB
 
 export const replayRouter = createTRPCRouter({
   start: protectedCollectorProcedure
     .input(
-      z.object({
-        startedAt: z.coerce.date(),
-        stageId: z.number(),
-        characterIds: z.array(z.number()),
-        file: z.instanceof(File),
-        wiiMacAddress: z
-          .string()
-          .regex(/^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/),
+      zfd.formData({
+        file: zfd.file(),
+        metadata: zfd.json(
+          z.object({
+            startedAt: z.coerce.date(),
+            stageId: z.number(),
+            characterIds: z.array(z.number()),
+            wiiMacAddress: z
+              .string()
+              .regex(/^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/),
+          }),
+        ),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input: { file, metadata } }) => {
+      if (!file || !metadata) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "File and metadata are required",
+        });
+      }
+
+      if (file.size === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "File is empty",
+        });
+      }
+
+      if (file.type !== "application/octet-stream") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "File is not a valid replay",
+        });
+      }
+
+      if (file.size > replayFileSizeLimit) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "File is too large",
+        });
+      }
+
       try {
         const bucketExists = await minioClient.bucketExists(replayBucket);
 
@@ -38,18 +71,18 @@ export const replayRouter = createTRPCRouter({
 
         const uploadedFile = await minioClient.putObject(
           replayBucket,
-          input.file.name,
-          Buffer.from(await input.file.arrayBuffer()),
-          input.file.size,
+          file.name,
+          Buffer.from(await file.arrayBuffer()),
+          file.size,
           fileMetadata,
         );
 
         const [replayEntry] = await db
           .insert(replay)
           .values({
-            startedAt: input.startedAt,
-            stageId: input.stageId,
-            characterIds: input.characterIds,
+            startedAt: metadata.startedAt,
+            stageId: metadata.stageId,
+            characterIds: metadata.characterIds,
             fileId: uploadedFile.etag,
             collectorUID: ctx.collector.uid,
           })
