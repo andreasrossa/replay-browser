@@ -63,8 +63,8 @@ export default function CollectorActions({
       />
       <RegenerateCollectorTokenDialog
         dialogProps={regenerateTokenDialog.props}
-        onRegenerate={(token) => {
-          openTokenDialog(token, collector);
+        onRegenerate={(token, tokenExpiresAt) => {
+          openTokenDialog(token, { ...collector, tokenExpiresAt });
         }}
         collector={collector}
       />

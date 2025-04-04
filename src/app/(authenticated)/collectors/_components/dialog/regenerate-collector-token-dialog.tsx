@@ -25,7 +25,7 @@ export default function RegenerateCollectorTokenDialog({
   const utils = api.useUtils();
   const regenerateToken = api.collector.regenerateToken.useMutation({
     onSuccess: (data) => {
-      void utils.collector.list.refetch();
+      void utils.collector.list.invalidate();
       toast.success(`Collector ${collector.displayName} token regenerated`);
       dialogProps.onOpenChange?.(false);
       // wait for the dialog to close before calling the callback
