@@ -10,9 +10,11 @@ import {
 import { useDialog } from "@/hooks/use-dialog";
 import { type CollectorDTO } from "@/server/db/schema/collector";
 import { KeyIcon, PencilIcon, TrashIcon } from "lucide-react";
+import React from "react";
 import DeleteCollectorDialog from "./dialog/delete-collector-dialog";
 import EditCollectorDialog from "./dialog/edit-collector-dialog";
 import RegenerateCollectorTokenDialog from "./dialog/regenerate-collector-token-dialog";
+import useTokenDialog from "./use-token-dialog";
 
 export default function CollectorActions({
   collector,
@@ -26,6 +28,7 @@ export default function CollectorActions({
   const editDialog = useDialog();
   const deleteDialog = useDialog();
   const regenerateTokenDialog = useDialog();
+  const { openTokenDialog, dialogComponent: tokenDialog } = useTokenDialog();
 
   return (
     <>
@@ -60,8 +63,12 @@ export default function CollectorActions({
       />
       <RegenerateCollectorTokenDialog
         dialogProps={regenerateTokenDialog.props}
+        onRegenerate={(token) => {
+          openTokenDialog(token, collector);
+        }}
         collector={collector}
       />
+      {tokenDialog}
     </>
   );
 }

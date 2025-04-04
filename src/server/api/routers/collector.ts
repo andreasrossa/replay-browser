@@ -60,8 +60,8 @@ export const collectorRouter = createTRPCRouter({
       }
 
       return {
-        ...createdCollector,
         token,
+        collector: createdCollector,
       };
     }),
   update: adminProcedure

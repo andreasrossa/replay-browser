@@ -16,15 +16,22 @@ import { toast } from "sonner";
 export default function RegenerateCollectorTokenDialog({
   collector,
   dialogProps,
+  onRegenerate,
 }: {
   collector: CollectorDTO;
   dialogProps: DialogProps;
+  onRegenerate: (token: string, tokenExpiresAt: Date) => void;
 }) {
   const utils = api.useUtils();
   const regenerateToken = api.collector.regenerateToken.useMutation({
-    onSuccess: () => {
-      void utils.collector.list.invalidate();
+    onSuccess: (data) => {
+      void utils.collector.list.refetch();
       toast.success(`Collector ${collector.displayName} token regenerated`);
+      dialogProps.onOpenChange?.(false);
+      // wait for the dialog to close before calling the callback
+      setTimeout(() => {
+        onRegenerate(data.token, data.tokenExpiresAt);
+      }, 100);
     },
     onError: () => {
       toast.error("Failed to regenerate collector token");

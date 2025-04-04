@@ -23,6 +23,7 @@ import {
   createCollectorSchema,
   type CreateCollectorSchemaInput,
 } from "@/schemas/collector";
+import { type CollectorDTO } from "@/server/db/schema";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type DialogProps } from "@radix-ui/react-dialog";
@@ -31,8 +32,16 @@ import { toast } from "sonner";
 
 export default function CreateCollectorDialog({
   dialogProps,
+  onCreated,
 }: {
   dialogProps: DialogProps;
+  onCreated?: ({
+    token,
+    collector,
+  }: {
+    token: string;
+    collector: CollectorDTO;
+  }) => void;
 }) {
   const utils = api.useUtils();
   const mutation = api.collector.create.useMutation({
@@ -49,11 +58,17 @@ export default function CreateCollectorDialog({
         toast.error("Failed to create collector");
       }
     },
-    onSuccess: () => {
-      void utils.collector.list.invalidate();
+    onSuccess: (res) => {
+      void utils.collector.list.refetch();
       toast.success("Collector created successfully");
       form.reset();
       dialogProps.onOpenChange?.(false);
+      setTimeout(() => {
+        onCreated?.({
+          token: res.token,
+          collector: res.collector,
+        });
+      }, 100);
     },
   });
 

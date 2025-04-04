@@ -17,6 +17,7 @@ import { MoreHorizontalIcon, PlusIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import CollectorActions from "./collector-actions";
 import CreateCollectorDialog from "./dialog/create-collector-dialog";
+import useTokenDialog from "./use-token-dialog";
 
 const columnHelper = createColumnHelper<CollectorDTO>();
 
@@ -31,9 +32,10 @@ export default function CollectorTable() {
       columnHelper.accessor("displayName", {
         header: "Display Name",
       }),
-      columnHelper.accessor("createdAt", {
-        header: "Created At",
-        cell: ({ getValue }) => getValue().toLocaleString("de-DE"),
+      columnHelper.accessor("tokenExpiresAt", {
+        header: "Token Expires At",
+        cell: ({ getValue }) =>
+          getValue() ? new Date(getValue()).toLocaleString("de-DE") : "Never",
       }),
       columnHelper.display({
         id: "actions",
@@ -71,6 +73,17 @@ export default function CollectorTable() {
   });
 
   const createCollectorDialog = useDialog();
+  const { openTokenDialog, dialogComponent: tokenDialog } = useTokenDialog();
+
+  const handleCreateCollector = ({
+    collector,
+    token,
+  }: {
+    collector: CollectorDTO;
+    token: string;
+  }) => {
+    openTokenDialog(token, collector);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -86,7 +99,11 @@ export default function CollectorTable() {
         </Button>
       </div>
       <DataTable table={table} />
-      <CreateCollectorDialog dialogProps={createCollectorDialog.props} />
+      <CreateCollectorDialog
+        dialogProps={createCollectorDialog.props}
+        onCreated={handleCreateCollector}
+      />
+      {tokenDialog}
     </div>
   );
 }
