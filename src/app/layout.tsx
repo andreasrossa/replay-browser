@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/react";
+import { PostHogProvider } from "@/components/PostHogProvider";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -18,8 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} dark`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
-        <Toaster />
+        <PostHogProvider>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster />
+        </PostHogProvider>
       </body>
     </html>
   );
