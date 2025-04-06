@@ -65,6 +65,13 @@ export const replayRouter = createTRPCRouter({
         });
       }
 
+      if (input.replayFile.size > replayFileSizeLimit) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Replay file is too large",
+        });
+      }
+
       const bucketExists = await minioClient.bucketExists(replayBucket);
 
       if (!bucketExists) {
