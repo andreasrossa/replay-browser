@@ -117,41 +117,43 @@ export const replayRouter = createTRPCRouter({
     }),
   list: protectedProcedure
     .input(
-      z.object({
-        collectorUID: z.string().optional(),
-        stageId: z.number().optional(),
-        characterIds: z.array(z.number()).optional(),
-        isFinished: z.boolean().optional(),
-        startedAfter: z.coerce.date().optional(),
-        startedBefore: z.coerce.date().optional(),
-      }),
+      z
+        .object({
+          collectorUID: z.string().optional(),
+          stageId: z.number().optional(),
+          characterIds: z.array(z.number()).optional(),
+          isFinished: z.boolean().optional(),
+          startedAfter: z.coerce.date().optional(),
+          startedBefore: z.coerce.date().optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
       const filterConditions = [];
 
-      if (input.collectorUID) {
+      if (input?.collectorUID) {
         filterConditions.push(eq(replay.collectorUID, input.collectorUID));
       }
 
-      if (input.stageId) {
+      if (input?.stageId) {
         filterConditions.push(eq(replay.stageId, input.stageId));
       }
 
-      if (input.characterIds) {
+      if (input?.characterIds) {
         filterConditions.push(
           arrayContains(replay.characterIds, input.characterIds),
         );
       }
 
-      if (input.isFinished) {
+      if (input?.isFinished) {
         filterConditions.push(eq(replay.isFinished, input.isFinished));
       }
 
-      if (input.startedAfter) {
+      if (input?.startedAfter) {
         filterConditions.push(gte(replay.startedAt, input.startedAfter));
       }
 
-      if (input.startedBefore) {
+      if (input?.startedBefore) {
         filterConditions.push(lte(replay.startedAt, input.startedBefore));
       }
 
