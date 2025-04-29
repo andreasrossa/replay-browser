@@ -6,7 +6,7 @@ export default function Home() {
     <main className="flex h-screen w-full items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <h1 className="inline-block bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 bg-clip-text text-6xl font-black text-transparent">
-          I got it recorded
+          I got that sh*t recorded
         </h1>
         <h2 className="text-2xl">Never loose another cool combo again.</h2>
         <Button asChild>

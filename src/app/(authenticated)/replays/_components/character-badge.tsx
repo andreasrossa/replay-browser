@@ -18,7 +18,7 @@ export default function CharacterBadge({
   return (
     <Badge
       variant="outline"
-      className={`rounded-full border-2 ${teamStyle[team]} text-sm`}
+      className={`rounded-full border-2 ${teamStyle[team]} h-8 text-sm`}
     >
       <Image
         src={`/img/character/${character}/0/stock.png`}
