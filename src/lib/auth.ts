@@ -22,6 +22,10 @@ export const roles = {
 export type Role = keyof typeof roles;
 
 export const auth = betterAuth({
+  trustedOrigins:
+    env.NODE_ENV == "production"
+      ? ["https://www.replays.dev"]
+      : ["http://localhost:3000"],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
