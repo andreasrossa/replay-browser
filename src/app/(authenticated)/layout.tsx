@@ -1,3 +1,4 @@
+import { PostHogProvider } from "@/components/PostHogProvider";
 import AppSidebar from "@/components/sidebar/app-sidebar";
 import {
   Breadcrumb,
@@ -19,7 +20,7 @@ export default function ReplaysLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <PostHogProvider>
       <SpeedInsights />
       <SidebarProvider>
         <AppSidebar />
@@ -38,6 +39,6 @@ export default function ReplaysLayout({
           <main className="p-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>
-    </>
+    </PostHogProvider>
   );
 }

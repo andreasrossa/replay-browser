@@ -28,6 +28,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string(),
   },
 
   /**
@@ -42,6 +43,7 @@ export const env = createEnv({
     COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS:
       process.env.COLLECTOR_TOKEN_EXPIRATION_TIME_SECONDS,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     INGESTOR_JWT_SECRET: process.env.INGESTOR_JWT_SECRET,
   },
   /**
