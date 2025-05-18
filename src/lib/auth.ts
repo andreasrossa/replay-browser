@@ -52,7 +52,7 @@ export const auth = betterAuth({
     discord: {
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
-      disableSignUp: false,
+      disableSignUp: true,
       redirectUri:
         env.NODE_ENV == "production"
           ? "https://www.replays.dev/api/auth/callback/discord"
