@@ -1,6 +1,6 @@
-import { betterAuth } from "better-auth";
+import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin } from "better-auth/plugins";
+import { admin, createAuthMiddleware } from "better-auth/plugins";
 
 import { db } from "@/server/db";
 import {
@@ -22,6 +22,13 @@ export const roles = {
 export type Role = keyof typeof roles;
 
 export const auth = betterAuth({
+  hooks: {
+    before: createAuthMiddleware(async (_ctx) => {
+      throw new APIError("BAD_REQUEST", {
+        message: "Signup is disabled",
+      });
+    }),
+  },
   trustedOrigins:
     env.NODE_ENV == "production"
       ? ["https://www.replays.dev"]
@@ -53,7 +60,7 @@ export const auth = betterAuth({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
       disableSignUp: true,
-      redirectUri:
+      redirectURI:
         env.NODE_ENV == "production"
           ? "https://www.replays.dev/api/auth/callback/discord"
           : "http://localhost:3000/api/auth/callback/discord",
