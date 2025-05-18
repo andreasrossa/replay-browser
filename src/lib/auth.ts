@@ -23,6 +23,9 @@ export const roles = {
 export type Role = keyof typeof roles;
 
 export const auth = betterAuth({
+  onAPIError: {
+    errorURL: "/error",
+  },
   databaseHooks: {
     user: {
       create: {
