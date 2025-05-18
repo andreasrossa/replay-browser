@@ -1,9 +1,10 @@
-import { env } from "@/env";
 import { adminClient, passkeyClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { accessControl, adminRole, userRole } from "./permissions";
+import { getBaseUrl } from "./utils/base-url";
+
 export const authClient = createAuthClient({
-  baseURL: env.NEXT_PUBLIC_URL,
+  baseURL: getBaseUrl(),
   plugins: [
     adminClient({
       ac: accessControl,

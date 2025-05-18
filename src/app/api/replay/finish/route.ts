@@ -12,10 +12,11 @@ export async function POST(request: NextRequest) {
   const caller = createCaller(ctx);
 
   try {
-    const data = (await request.json()) as inferProcedureInput<
-      AppRouter["replay"]["start"]
+    const data = (await request.formData()) as inferProcedureInput<
+      AppRouter["replay"]["finish"]
     >;
-    const replay = await caller.replay.start(data);
+
+    const replay = await caller.replay.finish(data);
     return NextResponse.json(replay);
   } catch (cause) {
     if (cause instanceof TRPCError) {

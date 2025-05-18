@@ -77,6 +77,13 @@ export const replayRouter = createTRPCRouter({
         });
       }
 
+      if (replayEntry.isFinished) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Replay already finished",
+        });
+      }
+
       const buffer = await input.file.arrayBuffer();
       const game = new SlippiGame(buffer);
 
