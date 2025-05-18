@@ -46,12 +46,13 @@ export const auth = betterAuth({
     passkeyPlugin(),
   ],
   emailAndPassword: {
-    enabled: true,
+    enabled: false,
   },
   socialProviders: {
     discord: {
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+      disableSignUp: true,
     },
   },
 });
