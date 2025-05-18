@@ -1,7 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { verifySession } from "@/lib/verify-session";
 import { api, HydrateClient } from "@/trpc/server";
-import ReplayList from "./_components/replay-list";
+import ReplayTable from "./_components/replay-table";
 
 export default async function ReplaysPage() {
   await verifySession();
@@ -10,12 +16,13 @@ export default async function ReplaysPage() {
 
   return (
     <HydrateClient>
-      <Card className="p-4">
+      <Card className="mx-auto w-full max-w-6xl">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Replays</CardTitle>
+          <CardDescription>{`Find and download replays.`}</CardDescription>
+        </CardHeader>
         <CardContent>
-          <CardHeader>
-            <CardTitle>Replays</CardTitle>
-          </CardHeader>
-          <ReplayList />
+          <ReplayTable />
         </CardContent>
       </Card>
     </HydrateClient>

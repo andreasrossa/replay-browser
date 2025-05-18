@@ -4,14 +4,14 @@ import {
   protectedProcedure,
 } from "@/server/api/trpc";
 import { replay } from "@/server/db/schema";
-import { minioClient } from "@/server/utils/minio";
+import { SlippiGame } from "@slippi/slippi-js";
 import { TRPCError } from "@trpc/server";
+import { BlobAccessError, put } from "@vercel/blob";
 import { and, arrayContains, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
-const replayBucket = "replays";
-const replayFileSizeLimit = 50 * 1024 * 1024; // 50MB
+const replayFileSizeLimit = 20 * 1024 * 1024; // 20MB
 
 export const replayRouter = createTRPCRouter({
   start: protectedCollectorProcedure
@@ -23,18 +23,20 @@ export const replayRouter = createTRPCRouter({
         wiiMacAddress: z
           .string()
           .regex(/^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/),
+        key: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const [replayEntry] = await ctx.db
         .insert(replay)
         .values({
+          key: input.key,
           startedAt: input.startedAt,
           stageId: input.stageId,
           characterIds: input.characterIds,
           collectorUID: ctx.collector.uid,
         })
-        .returning({ id: replay.id });
+        .returning();
 
       if (!replayEntry) {
         throw new TRPCError({
@@ -43,60 +45,91 @@ export const replayRouter = createTRPCRouter({
         });
       }
 
-      return replayEntry;
+      return {
+        ...replayEntry,
+        startedAt: replayEntry.startedAt.getTime(),
+        updatedAt: replayEntry.updatedAt?.getTime(),
+      };
     }),
-  end: protectedCollectorProcedure
+  finish: protectedCollectorProcedure
     .input(
       zfd.formData({
-        replayId: zfd.numeric(),
-        replayFile: zfd.file(),
+        key: zfd.text(),
+        file: zfd.file(),
+      }),
+    )
+    .output(
+      z.object({
+        frameCount: z.number(),
+        id: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const [replayEntry] = await ctx.db
         .select()
         .from(replay)
-        .where(eq(replay.id, input.replayId));
+        .where(eq(replay.key, input.key));
 
       if (!replayEntry) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Replay not found",
+          message: "Replay ID not found",
         });
       }
 
-      if (input.replayFile.size > replayFileSizeLimit) {
+      const buffer = await input.file.arrayBuffer();
+      const game = new SlippiGame(buffer);
+
+      const frameCount = game.getLatestFrame()?.frame;
+
+      if (!frameCount) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Replay file is invalid",
+        });
+      }
+
+      if (input.file.size > replayFileSizeLimit) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Replay file is too large",
         });
       }
 
-      const bucketExists = await minioClient.bucketExists(replayBucket);
+      const blobName = `${replayEntry.collectorUID}-${replayEntry.stageId}-${replayEntry.startedAt.toISOString()}.slp`;
 
-      if (!bucketExists) {
-        await minioClient.makeBucket(replayBucket);
+      try {
+        const putResult = await put(blobName, input.file, {
+          access: "public",
+          addRandomSuffix: true,
+        });
+
+        await ctx.db
+          .update(replay)
+          .set({
+            fileURL: putResult.url,
+            frameCount,
+            isFinished: true,
+          })
+          .where(eq(replay.id, replayEntry.id));
+
+        return {
+          frameCount,
+          id: replayEntry.id,
+        };
+      } catch (error) {
+        if (error instanceof BlobAccessError) {
+          // handle a recognized error
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to upload replay file",
+            cause: error,
+          });
+        } else {
+          // throw the error again if it's unknown
+          throw error;
+        }
       }
-
-      const fileMetadata = {
-        "Content-Type": "binary/octet-stream",
-      };
-
-      const uploadedFile = await minioClient.putObject(
-        replayBucket,
-        input.replayFile.name,
-        Buffer.from(await input.replayFile.arrayBuffer()),
-        input.replayFile.size,
-        fileMetadata,
-      );
-
-      await ctx.db
-        .update(replay)
-        .set({
-          fileId: uploadedFile.etag,
-          isFinished: true,
-        })
-        .where(eq(replay.id, input.replayId));
     }),
   get: protectedProcedure
     .input(z.object({ replayId: z.number() }))

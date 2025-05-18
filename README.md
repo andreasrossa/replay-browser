@@ -17,10 +17,4 @@ There is a _collector_ component written in Elixir as well, it will be linked he
 
 - [/] Add API routes to post replay start/end events
 - [ ] implement api calls in collector for replay start/end events
-- [ ] show modal with token when collector is created
-- [ ] show modal with token when collector token is regenerated
-- [ ] Live Replay Updates
-  - [ ] Add socket.io server for websocket connection
-  - [ ] Push replay events to redis on collector
-  - [ ] Consume replay events on socket.io server and forward via websocket
-  - [ ] display replay updates in frontend
+- [ ] implement JWT generation endpoint for authenticating collectors with the ws-ingestor

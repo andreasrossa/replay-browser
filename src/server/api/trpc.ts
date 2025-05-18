@@ -14,7 +14,7 @@ import { auth, type Role } from "@/lib/auth";
 import { db } from "@/server/db";
 import { collector as collectorTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import { hashToken } from "../utils/generate-token";
+import { hashCollectorToken } from "../utils/collector-token";
 /**
  * 1. CONTEXT
  *
@@ -158,7 +158,7 @@ export const protectedCollectorProcedure = t.procedure.use(
 
     try {
       const collector = await db.query.collector.findFirst({
-        where: eq(collectorTable.token, hashToken(collectorToken)),
+        where: eq(collectorTable.token, hashCollectorToken(collectorToken)),
       });
 
       if (!collector) {

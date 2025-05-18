@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  index,
   integer,
   pgTable,
   text,
@@ -13,6 +14,7 @@ export const replay = pgTable(
   "replay",
   {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    key: text("key").notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
       () => new Date(),
     ),
@@ -20,7 +22,7 @@ export const replay = pgTable(
     frameCount: integer("frame_count"),
     stageId: integer("stage_id"),
     characterIds: integer("character_ids").array().notNull(),
-    fileId: text("file_id"),
+    fileURL: text("file_url"),
     isFinished: boolean("is_finished").notNull().default(false),
     collectorUID: text("collector_uid")
       .notNull()
@@ -28,6 +30,7 @@ export const replay = pgTable(
   },
   (t) => [
     check("character_ids_length", sql`array_length(${t.characterIds}, 1) = 2`),
+    index("key_idx").on(t.key),
   ],
 );
 

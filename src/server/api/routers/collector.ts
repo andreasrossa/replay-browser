@@ -3,9 +3,17 @@ import {
   createCollectorSchema,
   editCollectorServerSchema,
 } from "@/schemas/collector";
-import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedCollectorProcedure,
+} from "@/server/api/trpc";
 import { collector } from "@/server/db/schema/collector";
-import { generateToken, hashToken } from "@/server/utils/generate-token";
+import {
+  generateCollectorToken,
+  hashCollectorToken,
+} from "@/server/utils/collector-token";
+import { generateIngestorToken } from "@/server/utils/ingestor-token";
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -41,8 +49,8 @@ export const collectorRouter = createTRPCRouter({
         });
       }
 
-      const token = generateToken();
-      const hashedToken = hashToken(token);
+      const token = generateCollectorToken();
+      const hashedToken = hashCollectorToken(token);
       const [createdCollector] = await db
         .insert(collector)
         .values({
@@ -116,8 +124,8 @@ export const collectorRouter = createTRPCRouter({
       }
 
       try {
-        const newToken = generateToken();
-        const hashedToken = hashToken(newToken);
+        const newToken = generateCollectorToken();
+        const hashedToken = hashCollectorToken(newToken);
 
         const [updatedCollector] = await db
           .update(collector)
@@ -173,4 +181,13 @@ export const collectorRouter = createTRPCRouter({
         });
       }
     }),
+  getIngestorToken: protectedCollectorProcedure.query(
+    async ({
+      ctx: {
+        collector: { uid: collectorUID },
+      },
+    }) => {
+      return generateIngestorToken(collectorUID);
+    },
+  ),
 });
