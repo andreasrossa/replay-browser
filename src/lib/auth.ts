@@ -1,5 +1,6 @@
-import { APIError, betterAuth } from "better-auth";
+import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError } from "better-auth/api";
 import { admin } from "better-auth/plugins";
 
 import { db } from "@/server/db";
@@ -25,12 +26,20 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (user, _ctx) => {
+        before: async (user, ctx) => {
+          console.log(
+            "Session in create User Hook: ",
+            ctx?.context.session?.user.email,
+          );
           if (user.email != "andreas@rossamail.de") {
             throw new APIError("BAD_REQUEST", {
               message: "Signup is disabled",
             });
           }
+
+          return {
+            data: user,
+          };
         },
       },
     },
