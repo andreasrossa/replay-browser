@@ -5,13 +5,11 @@ import { usePhoenixChannel } from "@/hooks/use-phoenix-channel";
 import { api } from "@/trpc/react";
 import { Suspense, useCallback, useContext } from "react";
 import ReplayGrid, { ReplayGridSkeleton } from "./ReplayGrid";
-import { PercentageContext } from "./percentage-context";
-import { StockContext } from "./stock-context";
+import { CharacterStateContext } from "./character-state-context";
 
 export default function ReplayTabs() {
   const utils = api.useUtils();
-  const { setPercentage } = useContext(PercentageContext);
-  const { setStock } = useContext(StockContext);
+  const { setCharacterState } = useContext(CharacterStateContext);
 
   const onEvent = useCallback(
     (event: string, payload: unknown, _ref: string) => {
@@ -19,46 +17,25 @@ export default function ReplayTabs() {
         void utils.replay.list.invalidate();
       }
 
-      if (event === "percentage_update") {
+      if (event === "character_state_update") {
         const {
-          payload: {
-            payload: { percentage, key, character_id },
-          },
+          payload: newCharacterState,
+          character_id,
+          key,
         } = payload as {
           payload: {
-            payload: {
-              percentage: number;
-              key: string;
-              character_id: number;
-            };
+            stocks: number;
+            percent: number;
           };
           collector: string;
+          character_id: number;
+          key: string;
         };
 
-        setPercentage(key, character_id, percentage);
-      }
-
-      if (event === "stock_update") {
-        console.log(payload);
-        const {
-          payload: {
-            payload: { stock, key, character_id },
-          },
-        } = payload as {
-          payload: {
-            payload: {
-              stock: number;
-              key: string;
-              character_id: number;
-            };
-          };
-          collector: string;
-        };
-
-        setStock(key, character_id, stock);
+        setCharacterState(key, character_id, newCharacterState);
       }
     },
-    [setPercentage, setStock, utils],
+    [setCharacterState, utils],
   );
 
   usePhoenixChannel("replays:lobby", onEvent);

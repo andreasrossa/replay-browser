@@ -18,3 +18,4 @@ There is a _collector_ component written in Elixir as well, it will be linked he
 - [/] Add API routes to post replay start/end events
 - [ ] implement api calls in collector for replay start/end events
 - [ ] implement JWT generation endpoint for authenticating collectors with the ws-ingestor
+- [ ] "Just Finished" / How long ago on replay card

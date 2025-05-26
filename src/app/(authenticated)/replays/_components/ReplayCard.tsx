@@ -8,8 +8,7 @@ import { format } from "date-fns";
 import { CalendarIcon, ClockIcon, MapPinIcon } from "lucide-react";
 import Image from "next/image";
 import { useContext } from "react";
-import { PercentageContext } from "./percentage-context";
-import { StockContext } from "./stock-context";
+import { CharacterStateContext } from "./character-state-context";
 
 const formatDate = (date: Date) => {
   return format(date, "dd.MM.yy HH:mm");
@@ -55,8 +54,9 @@ function PlayerCard({
   playerNumber: 1 | 2;
   replayKey: string;
 }) {
-  const { percentages } = useContext(PercentageContext);
-  const { stocks } = useContext(StockContext);
+  const { characterStates } = useContext(CharacterStateContext);
+
+  const characterState = characterStates[replayKey]?.[player.characterId];
 
   const bgColor = playerNumber === 1 ? "blue" : "red";
   return (
@@ -100,16 +100,12 @@ function PlayerCard({
             {characterIds[player.characterId] ?? "Unknown"}
           </div>
           <div className="mt-1 flex items-center gap-2">
-            <StockDisplay
-              stocks={stocks[replayKey]?.[player.characterId] ?? 4}
-            />
+            <StockDisplay stocks={characterState?.stocks ?? 4} />
           </div>
         </div>
       </div>
       <div className="text-right">
-        <PercentageNumber
-          percentage={percentages[replayKey]?.[player.characterId] ?? 0}
-        />
+        <PercentageNumber percentage={characterState?.percent ?? 0} />
       </div>
     </div>
   );
