@@ -42,10 +42,7 @@ export default function ReplayTable() {
           });
         },
       }),
-      columnHelper.accessor("characterIds", {
-        header: "Character IDs",
-        cell: ({ getValue }) => getValue().join(", "),
-      }),
+
       columnHelper.accessor("stageId", {
         header: "Stage ID",
       }),
@@ -53,7 +50,7 @@ export default function ReplayTable() {
     [],
   );
 
-  const [data] = api.replay.list.useSuspenseQuery();
+  const [data] = api.replay.list.useSuspenseQuery({});
 
   const table = useReactTable({
     data,

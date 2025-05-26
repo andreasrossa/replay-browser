@@ -7,7 +7,7 @@ import { replay } from "@/server/db/schema";
 import { SlippiGame } from "@slippi/slippi-js";
 import { TRPCError } from "@trpc/server";
 import { BlobAccessError, put } from "@vercel/blob";
-import { and, arrayContains, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
@@ -19,7 +19,16 @@ export const replayRouter = createTRPCRouter({
       z.object({
         startedAt: z.coerce.date(),
         stageId: z.number(),
-        characterIds: z.array(z.number()),
+        player1: z.object({
+          characterId: z.number(),
+          tag: z.string().optional(),
+          skin: z.number(),
+        }),
+        player2: z.object({
+          characterId: z.number(),
+          tag: z.string().optional(),
+          skin: z.number(),
+        }),
         wiiMacAddress: z
           .string()
           .regex(/^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/),
@@ -33,8 +42,9 @@ export const replayRouter = createTRPCRouter({
           key: input.key,
           startedAt: input.startedAt,
           stageId: input.stageId,
-          characterIds: input.characterIds,
           collectorUID: ctx.collector.uid,
+          player1: input.player1,
+          player2: input.player2,
         })
         .returning();
 
@@ -45,11 +55,7 @@ export const replayRouter = createTRPCRouter({
         });
       }
 
-      return {
-        ...replayEntry,
-        startedAt: replayEntry.startedAt.getTime(),
-        updatedAt: replayEntry.updatedAt?.getTime(),
-      };
+      return replayEntry;
     }),
   finish: protectedCollectorProcedure
     .input(
@@ -61,7 +67,7 @@ export const replayRouter = createTRPCRouter({
     .output(
       z.object({
         frameCount: z.number(),
-        id: z.number(),
+        key: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -77,7 +83,7 @@ export const replayRouter = createTRPCRouter({
         });
       }
 
-      if (replayEntry.isFinished) {
+      if (replayEntry.status === "finished") {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Replay already finished",
@@ -116,13 +122,13 @@ export const replayRouter = createTRPCRouter({
           .set({
             fileURL: putResult.url,
             frameCount,
-            isFinished: true,
+            status: "finished",
           })
-          .where(eq(replay.id, replayEntry.id));
+          .where(eq(replay.key, replayEntry.key));
 
         return {
           frameCount,
-          id: replayEntry.id,
+          key: replayEntry.key,
         };
       } catch (error) {
         if (error instanceof BlobAccessError) {
@@ -139,12 +145,12 @@ export const replayRouter = createTRPCRouter({
       }
     }),
   get: protectedProcedure
-    .input(z.object({ replayId: z.number() }))
+    .input(z.object({ key: z.string() }))
     .query(async ({ input, ctx }) => {
       const [replayEntry] = await ctx.db
         .select()
         .from(replay)
-        .where(eq(replay.id, input.replayId));
+        .where(eq(replay.key, input.key));
 
       if (!replayEntry) {
         throw new TRPCError({
@@ -157,43 +163,34 @@ export const replayRouter = createTRPCRouter({
     }),
   list: protectedProcedure
     .input(
-      z
-        .object({
-          collectorUID: z.string().optional(),
-          stageId: z.number().optional(),
-          characterIds: z.array(z.number()).optional(),
-          isFinished: z.boolean().optional(),
-          startedAfter: z.coerce.date().optional(),
-          startedBefore: z.coerce.date().optional(),
-        })
-        .optional(),
+      z.object({
+        collectorUID: z.string().optional(),
+        stageId: z.number().optional(),
+        status: z.enum(["live", "finished", "error"]).optional(),
+        startedAfter: z.coerce.date().optional(),
+        startedBefore: z.coerce.date().optional(),
+      }),
     )
     .query(async ({ ctx, input }) => {
       const filterConditions = [];
 
-      if (input?.collectorUID) {
+      if (input.collectorUID) {
         filterConditions.push(eq(replay.collectorUID, input.collectorUID));
       }
 
-      if (input?.stageId) {
+      if (input.stageId) {
         filterConditions.push(eq(replay.stageId, input.stageId));
       }
 
-      if (input?.characterIds) {
-        filterConditions.push(
-          arrayContains(replay.characterIds, input.characterIds),
-        );
+      if (input.status) {
+        filterConditions.push(eq(replay.status, input.status));
       }
 
-      if (input?.isFinished) {
-        filterConditions.push(eq(replay.isFinished, input.isFinished));
-      }
-
-      if (input?.startedAfter) {
+      if (input.startedAfter) {
         filterConditions.push(gte(replay.startedAt, input.startedAfter));
       }
 
-      if (input?.startedBefore) {
+      if (input.startedBefore) {
         filterConditions.push(lte(replay.startedAt, input.startedBefore));
       }
 
@@ -202,7 +199,8 @@ export const replayRouter = createTRPCRouter({
         .from(replay)
         .where(
           filterConditions.length > 0 ? and(...filterConditions) : undefined,
-        );
+        )
+        .orderBy(desc(replay.startedAt));
 
       return replayEntries;
     }),

@@ -1,30 +1,21 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { verifySession } from "@/lib/verify-session";
 import { api, HydrateClient } from "@/trpc/server";
-import ReplayTable from "./_components/replay-table";
+import ReplayTabs from "./_components/ReplayTabs";
+import { PercentageProvider } from "./_components/percentage-context";
+import { StockProvider } from "./_components/stock-context";
 
 export default async function ReplaysPage() {
   await verifySession();
 
-  void api.replay.list.prefetch();
+  void api.replay.list.prefetch({});
 
   return (
     <HydrateClient>
-      <Card className="mx-auto w-full max-w-6xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Replays</CardTitle>
-          <CardDescription>{`Find and download replays.`}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ReplayTable />
-        </CardContent>
-      </Card>
+      <StockProvider>
+        <PercentageProvider>
+          <ReplayTabs />
+        </PercentageProvider>
+      </StockProvider>
     </HydrateClient>
   );
 }

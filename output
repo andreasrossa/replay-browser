@@ -1,0 +1,39 @@
+   ▲ Next.js 15.2.3 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.8.173:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 908ms
+ ○ Compiling /api/replay/start ...
+ ✓ Compiled /api/replay/start in 1634ms
+ POST /api/replay/start 200 in 1998ms
+ ○ Compiling /api/replay/finish ...
+ ✓ Compiled /api/replay/finish in 1075ms
+Failed to parse body as FormData.
+TypeError: Failed to parse body as FormData.
+    at node:internal/deps/undici/undici:5619:27
+    at successSteps (node:internal/deps/undici/undici:5663:27)
+    at fullyReadBody (node:internal/deps/undici/undici:4561:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async consumeBody (node:internal/deps/undici/undici:5672:7)
+    at async POST (/Users/andreasrossa/dev/replay-browser/.next/server/chunks/[root of the server]__815fe4f7._.js:1377:22)
+    at async AppRouteRouteModule.do (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:26:33891)
+    at async AppRouteRouteModule.handle (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:26:41254)
+    at async doRender (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/base-server.js:1513:42)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/base-server.js:1915:28)
+    at async DevServer.renderPageComponent (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/base-server.js:2393:24)
+    at async DevServer.renderToResponseImpl (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/base-server.js:2430:32)
+    at async DevServer.pipeImpl (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/base-server.js:1003:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/next-server.js:304:17)
+    at async DevServer.handleRequestImpl (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/base-server.js:895:17)
+    at async /Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/dev/next-dev-server.js:371:20
+    at async Span.traceAsyncFn (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/dev/next-dev-server.js:368:24)
+    at async invokeRender (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/lib/router-server.js:247:21)
+    at async handleRequest (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/lib/router-server.js:438:24)
+    at async requestHandlerImpl (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/lib/router-server.js:462:13)
+    at async Server.requestListener (/Users/andreasrossa/dev/replay-browser/node_modules/next/dist/server/lib/start-server.js:158:13)
+undefined
+ POST /api/replay/finish 500 in 1127ms
+[?25h

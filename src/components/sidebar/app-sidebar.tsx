@@ -18,7 +18,7 @@ export default function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Replay Browser</SidebarGroupLabel>
           <SidebarGroupContent>
             <Suspense fallback={<Skeleton className="h-8 w-full" />}>
               <AppSidebarMenu />

@@ -16,10 +16,15 @@ export async function POST(request: NextRequest) {
       AppRouter["replay"]["finish"]
     >;
 
+    console.log((data as FormData).get("key"));
+
     const replay = await caller.replay.finish(data);
     return NextResponse.json(replay);
   } catch (cause) {
     if (cause instanceof TRPCError) {
+      console.log(cause.message);
+      console.log(cause.cause);
+      console.log(cause.stack);
       const status = getHTTPStatusCodeFromError(cause);
 
       return NextResponse.json(cause.message, { status });
