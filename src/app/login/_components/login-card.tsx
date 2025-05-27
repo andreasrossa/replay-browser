@@ -136,6 +136,7 @@ export default function LoginCard() {
           <Button
             className="w-full"
             variant="outline"
+            disabled
             onClick={() => {
               toast.info("Google Login is not available quite yet.");
             }}
