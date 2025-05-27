@@ -19,6 +19,7 @@ export const env = createEnv({
       .number()
       .default(60 * 60 * 24 * 365), // 365 days
     INGESTOR_JWT_SECRET: z.string(),
+    VERCEL_URL: z.string().url().optional(),
   },
 
   /**
@@ -47,6 +48,7 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     INGESTOR_JWT_SECRET: process.env.INGESTOR_JWT_SECRET,
     NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+    VERCEL_URL: process.env.VERCEL_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
