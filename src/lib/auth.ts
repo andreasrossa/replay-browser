@@ -47,7 +47,9 @@ export const auth = betterAuth({
       },
     },
   },
-  trustedOrigins: env.VERCEL_URL ? [env.VERCEL_URL] : ["http://localhost:3000"],
+  trustedOrigins: env.VERCEL_URL
+    ? [`https://${env.VERCEL_URL}`]
+    : ["http://localhost:3000"],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

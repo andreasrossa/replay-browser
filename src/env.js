@@ -19,7 +19,7 @@ export const env = createEnv({
       .number()
       .default(60 * 60 * 24 * 365), // 365 days
     INGESTOR_JWT_SECRET: z.string(),
-    VERCEL_URL: z.string().url().optional(),
+    VERCEL_URL: z.string().optional(),
   },
 
   /**
