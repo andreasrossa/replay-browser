@@ -1,10 +1,9 @@
 "use client";
 
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth-client";
-import { ChevronUpIcon, KeyIcon, LogOutIcon, UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useAuth } from "@clerk/clerk-react";
+import { useUser } from "@clerk/nextjs";
+import { ChevronUpIcon, LogOutIcon, UserIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +13,10 @@ import {
 import { Skeleton } from "../ui/skeleton";
 
 export function SidebarUserMenu() {
-  const session = authClient.useSession();
-  const router = useRouter();
+  const { isLoaded, signOut, orgId } = useAuth();
+  const { user } = useUser();
 
-  if (session.isPending) {
+  if (!isLoaded) {
     return (
       <SidebarMenuButton className="flex w-full justify-between">
         <Skeleton className="h-4 w-4" />
@@ -25,12 +24,16 @@ export function SidebarUserMenu() {
       </SidebarMenuButton>
     );
   }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton className="flex w-full justify-between">
           <UserIcon className="size-4" />
-          <span className="truncate">{session.data?.user?.email}</span>
+          <span className="truncate">
+            {user?.primaryEmailAddress?.emailAddress}
+            {orgId}
+          </span>
           <ChevronUpIcon className="size-4" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -40,31 +43,7 @@ export function SidebarUserMenu() {
       >
         <DropdownMenuItem
           onClick={() => {
-            void authClient.passkey
-              .addPasskey()
-              .then((_res) => {
-                toast.success("Passkey added successfully!");
-              })
-              .catch((error) => {
-                console.error("Failed to add passkey", error);
-                toast.error("Failed to add passkey");
-              });
-          }}
-        >
-          <KeyIcon className="size-4" />
-          <span>Add Passkey</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            authClient
-              .signOut()
-              .then(() => {
-                void router.push("/");
-              })
-              .catch((error) => {
-                console.error("Failed to sign out", error);
-                toast.error("Failed to sign out");
-              });
+            void signOut();
           }}
         >
           <LogOutIcon className="size-4" />

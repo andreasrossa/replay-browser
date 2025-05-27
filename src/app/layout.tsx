@@ -6,6 +6,8 @@ import { type Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/react";
 
+import { ClerkProvider } from "@clerk/nextjs";
+
 export const metadata: Metadata = {
   title: "Replay Browser",
   description: "Browse and search for replays",
@@ -16,11 +18,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} dark`}>
-      <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
-        <Toaster />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${GeistSans.variable} dark`}>
+        <body>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

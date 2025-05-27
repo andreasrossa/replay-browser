@@ -5,13 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { verifySession } from "@/lib/verify-session";
 import { api, HydrateClient } from "@/trpc/server";
+import { auth } from "@clerk/nextjs/server";
 import CollectorTable from "./_components/collector-table";
 
 export default async function CollectorsPage() {
-  await verifySession({
-    hasRoles: ["admin"],
+  await auth.protect({
+    role: "admin",
   });
 
   void api.collector.list.prefetch();

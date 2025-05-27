@@ -6,14 +6,13 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { ZodError } from "zod";
-
-import { auth, type Role } from "@/lib/auth";
 import { db } from "@/server/db";
 import { collector as collectorTable } from "@/server/db/schema";
+import { auth } from "@clerk/nextjs/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import superjson from "superjson";
+import { ZodError } from "zod";
 import { hashCollectorToken } from "../utils/collector-token";
 /**
  * 1. CONTEXT
@@ -28,7 +27,7 @@ import { hashCollectorToken } from "../utils/collector-token";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await auth.api.getSession({ headers: opts.headers });
+  const session = await auth();
   return {
     db,
     session,
@@ -132,7 +131,7 @@ export const protectedProcedure = publicProcedure.use(
 export const adminProcedure = protectedProcedure.use(
   async function isAdmin(opts) {
     const { ctx } = opts;
-    if (ctx.session.user.role === ("admin" satisfies Role)) {
+    if (ctx.session.has({ role: "admin" })) {
       return opts.next({
         ctx: {
           session: ctx.session,

@@ -3,8 +3,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { type Session } from "@/lib/auth-client";
-import { verifySession } from "@/lib/verify-session";
+import { auth } from "@clerk/nextjs/server";
 import { Gamepad2Icon, HouseIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -12,7 +11,7 @@ type SidebarItem = {
   title: string;
   icon: React.ElementType;
   href: string;
-  condition?: (session?: Session | null) => boolean;
+  adminOnly?: boolean;
 };
 
 const items: SidebarItem[] = [
@@ -25,17 +24,19 @@ const items: SidebarItem[] = [
     title: "Collectors",
     icon: HouseIcon,
     href: "/collectors",
-    condition: (session) => session?.user.role === "admin",
+    adminOnly: true,
   },
 ];
 
 export default async function AppSidebarMenu() {
-  const session = await verifySession();
+  const { has } = await auth();
+
+  console.log();
 
   return (
     <SidebarMenu>
       {items
-        .filter((item) => !item.condition || item.condition(session))
+        .filter((item) => !item.adminOnly || has({ role: "org:admin" }))
         .map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
